@@ -53,8 +53,10 @@ gofcens(times, cens = rep(1, length(times)),
 \value{
 A list containing the following components
  \item{\code{Tests statistics}}{Values of the Kolmogovor-Smirnov, Crámer-von Mises,
- and Anderson-Darling test statistics }
+       and Anderson-Darling test statistics }
  \item{\code{Distribution}}{Null distribution}
+ \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
+                         of the distribution under study.}
 }
 \references{
 T. R. Fleming et al. \emph{Modified Kolmogorov-Smirnov test procedure with application 

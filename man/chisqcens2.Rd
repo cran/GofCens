@@ -78,10 +78,11 @@ set.seed(123)
 library(survsim)
 n <- 50
 datos <- simple.surv.sim(n, Inf,  dist.ev = "lnorm", 3, 2, 
-                         dist.cens = "lnorm",3, 2)
+                         dist.cens = "lnorm", 3, 2)
 chisqcens2(datos$stop, datos$status, M = 8, "lognormal", "lognormal")
 chisqcens2(datos$stop, datos$status, M = 8, "lognormal", "unif")
 
+data(nba)
 chisqcens2(nba$survtime, nba$cens, 10, "loglog", BS = 100)
 }
 }

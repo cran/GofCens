@@ -94,8 +94,10 @@ probPlot(times, cens = rep(1, length(times)),
          \code{fitdistcens} function of the \pkg{fitdistrplus} package.
 }
 \value{
-\item{outp}{List with the maximum likelihood estimates of the parameters of the 
-            distribution under study.}
+A list containing the following components
+ \item{\code{Distribution}}{Distribution under study.}
+ \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
+                          of the distribution under study.}
 }
 \references{
 J. R. Michael. \emph{The Stabilized Probability Plot}. In: Biometrika 70 (1) (1983), 

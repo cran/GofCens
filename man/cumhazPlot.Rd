@@ -53,8 +53,8 @@ cumhazPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1,
          The parameter estimation is acomplished with the \code{fitdistcens} 
          function of the \pkg{fitdistrplus} package.}
 \value{
-  \item{params}{A list with the maximum likelihood estimates of the parameters of
-                all distributions considered.}}
+  \item{Parameter estimates}{A list with the maximum likelihood estimates of the 
+                             parameters of all distributions considered.}}
 \author{K. Langohr, M. Besalú, G. Gómez.}
 \examples{
 # Complete data and default distributions

@@ -48,7 +48,8 @@ function(times, cens = rep(1, length(times)),
     tryCatch({
       fitExpo <- fitdistcens(dd, "exp")
       rateExpo <- fitExpo$estimate[1]
-      params$exponential <- rateExpo
+      params$exponential <- 1 / rateExpo
+      names(params$exponential) <- "scale"
       xscale$exponential <- tim
       yscale$exponential <- Haz
       xlabs$exponential <- xla
@@ -62,7 +63,8 @@ function(times, cens = rep(1, length(times)),
       fitGumb <- fitdistcens(dd, "gumbel", start = list(alpha = 0, scale = 3))
       locGumb <- fitGumb$estimate[1]
       scaleGumb <- fitGumb$estimate[2]
-      params$gumbel <- c("location" = locGumb, scaleGumb)
+      params$gumbel <- c(locGumb, scaleGumb)
+      names(params$gumbel) <- c("location", "scale")
       xscale$gumbel <- tim
       yscale$gumbel <- -log(-log(1 - exp(-Haz)))
       xlabs$gumbel <- xla
@@ -91,6 +93,7 @@ function(times, cens = rep(1, length(times)),
       locNorm <- fitNorm$estimate[1]
       scaleNorm <- fitNorm$estimate[2]
       params$normal <- fitNorm$estimate
+      names(params$normal) <- c("location", "scale")
       xscale$normal <- tim
       yscale$normal <- qnorm(1 - exp(-Haz))
       xlabs$normal <- xla
@@ -119,6 +122,7 @@ function(times, cens = rep(1, length(times)),
       locLnorm <- fitLnorm$estimate[1]
       scaleLnorm <- fitLnorm$estimate[2]
       params$lognormal <- c(locLnorm, scaleLnorm)
+      names(params$lognormal) <- c("location", "scale")
       xscale$lognormal <- log(tim)
       yscale$lognormal <- qnorm(1 - exp(-Haz))
       xlabs$lognormal <- xlogla
@@ -148,7 +152,8 @@ function(times, cens = rep(1, length(times)),
       fitBeta <- fitdistcens((dd - aBeta) / (bBeta - aBeta), "beta")
       shape1Beta <- fitBeta$estimate[1]
       shape2Beta <- fitBeta$estimate[2]
-      params$beta <- list(param = c(shape1Beta, shape2Beta), domain = betaLimits)
+      params$beta <- list(parameters = c(shape1Beta, shape2Beta),
+                          domain = betaLimits)
       xscale$beta <- tim
       yscale$beta <- qbeta(1 - exp(-Haz), shape1Beta, shape2Beta)
       xlabs$beta <- xla
@@ -157,7 +162,7 @@ function(times, cens = rep(1, length(times)),
       titl$beta <- "Beta"
     }, error = function(e) e)
   }
-  old <- options(digits = 2)
+  old <- options(digits = 7)
   on.exit(options(old))
   options(digits = decdig)
   if (is.null(m)) {

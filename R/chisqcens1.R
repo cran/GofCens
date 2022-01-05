@@ -41,9 +41,9 @@ function(times, cens = rep(1, length(times)), M,
     if (is.null(beta)) {
       muu <- unname(coefficients(survreg(Surv(times, cens) ~ 1,
                                          dist = "exponential")))
-      beta <- exp(-muu)
+      beta <- 1 / exp(-muu)
     }
-    expProb <- pexp(cb[1:M + 1], beta) - pexp(cb[1:M], beta)
+    expProb <- pexp(cb[1:M + 1], 1 / beta) - pexp(cb[1:M], 1 / beta)
   }
   if (distr == "gumbel") {
     if (is.null(mu) || is.null(beta)) {
@@ -58,7 +58,7 @@ function(times, cens = rep(1, length(times)), M,
       mu <- unname(param$estimate[1])
       beta <- unname(param$estimate[2])
     }
-    expProb <- pgumbel(cb[1:M + 1], beta, mu) - pgumbel(cb[1:M], beta, mu)
+    expProb <- pgumbel(cb[1:M + 1], mu, beta) - pgumbel(cb[1:M], mu, beta)
   }
   if (distr == "weibull") {
     if (is.null(alpha) || is.null(beta)) {
@@ -99,7 +99,8 @@ function(times, cens = rep(1, length(times)), M,
       alpha <- 1 / exp(param[2])
       beta <- exp(param[1])
     }
-    expProb <- pllogis(cb[1:M + 1], alpha, beta) - pllogis(cb[1:M], alpha, beta)
+    expProb <- pllogis(cb[1:M + 1], alpha, scale = beta) -
+               pllogis(cb[1:M], alpha, scale = beta)
   }
   if (distr == "beta") {
     aBeta <- betaLimits[1]

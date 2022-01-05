@@ -2,8 +2,8 @@ export("chisqcens1", "chisqcens2", "cumhazPlot", "gofcens", "KScens", "probPlot"
 
 import("fitdistrplus", "survsim", "grid", "ggplot2")
 importFrom("survival", "Surv", "survreg", "survfit")
-importFrom("eha", "dllogis", "pllogis", "qllogis", "rllogis")
-importFrom("actuar", "dgumbel", "pgumbel", "qgumbel", "rgumbel")
+importFrom("actuar", "dgumbel", "pgumbel", "qgumbel", "rgumbel",
+           "dllogis", "pllogis", "qllogis", "rllogis")
 importFrom("gridExtra", "grid.arrange")
 importFrom("graphics", "abline", "layout", "lines", "par", "title")
 importFrom("stats", "coefficients", "ecdf", "pbeta", "pexp", "plnorm",

@@ -30,9 +30,9 @@ function(times, cens = rep(1, length(times)),
     if (is.null(beta)) {
       muu <- unname(coefficients(survreg(Surv(times, cens) ~ 1,
                                          dist = "exponential")))
-      beta <- exp(-muu)
+      beta <- 1 / exp(-muu)
     }
-    y0 <- c(pexp(stimes, beta), 1)
+    y0 <- c(pexp(stimes, 1 / beta), 1)
   }
   if (distr == "gumbel") {
     if (is.null(mu) || is.null(beta)) {
@@ -88,7 +88,7 @@ function(times, cens = rep(1, length(times)),
       alpha <- 1 / exp(param[2])
       beta <- exp(param[1])
     }
-    y0 <- c(pllogis(stimes, alpha, beta), 1)
+    y0 <- c(pllogis(stimes, alpha, scale = beta), 1)
   }
   if (distr == "beta") {
     aBeta <- betaLimits[1]
@@ -111,8 +111,10 @@ function(times, cens = rep(1, length(times)),
                sum(Fn[-nc]^2 *
                    (-log(1 - y0[-1]) + log(y0[-1]) + log(1 - y0[-nc]) - log(y0[-nc]))) -
                2 * sum(Fn[-nc] * (-log(1 - y0[-1]) + log(1 - y0[-nc]))))
-  KS = KScens(times, cens, distr, betaLimits)$Test[2]
+  KS <- as.vector(KScens(times, cens, distr, betaLimits)$Test[2])
   output <- list("Test statistics" = round(c(KS = KS, CvM = CvM, AD = AD), degs),
-                 Distribution = distr)
+                 Distribution = distr,
+                 Parameters = round(c(shape = alpha, shape2 = gamma,
+                                      location = mu, scale = beta), degs))
   return(output)
 }

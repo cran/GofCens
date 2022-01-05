@@ -1,7 +1,7 @@
 chisqcens2 <-
 function(times, cens, M, distrData = c("weibull", "lognormal", "loglogistic"),
-         distrCens = c("weibull", "lognormal", "loglogistic", "uniform"), 
-         BS = 1000, degs = 4, 
+         distrCens = c("weibull", "lognormal", "loglogistic", "uniform"),
+         BS = 1000, degs = 4,
          params = list(shape = NULL, location = NULL, scale = NULL)) {
   if (!is.numeric(times)) {
     stop("Variable times must be numeric!")
@@ -48,15 +48,14 @@ function(times, cens, M, distrData = c("weibull", "lognormal", "loglogistic"),
   if (distrData == "weibull") {
     if (distrCens == "weibull") {
       for (i in 1:BS) {
-        rand <- simple.surv.sim(n, Inf,  dist.ev = "weibull", alpha, -log(beta),
-                                dist.cens = "weibull", alphaCens, -log(betaCens))
-        t[i] <- chisqcens1(rand$stop, rand$status, M, distr = "weibull",
-                           params = list(shape = alpha, scale = beta))$Statistic
+        rand <- simple.surv.sim(n, Inf,  dist.ev = "weibull", alpha, log(beta),
+                                dist.cens = "weibull", alphaCens, log(betaCens))
+        t[i] <- chisqcens1(rand$stop, rand$status, M, distr = "weibull")$Statistic
       }
     }
     if (distrCens == "lognormal") {
       for (i in 1:BS) {
-        rand <- simple.surv.sim(n, Inf,  dist.ev = "weibull", alpha, -log(beta),
+        rand <- simple.surv.sim(n, Inf,  dist.ev = "weibull", alpha, log(beta),
                                 dist.cens = "lnorm", betaCens, muCens)
         t[i] <- chisqcens1(rand$stop, rand$status, M, distr = "weibull",
                            params = list(shape = alpha, scale = beta))$Statistic
@@ -64,16 +63,16 @@ function(times, cens, M, distrData = c("weibull", "lognormal", "loglogistic"),
     }
     if (distrCens == "loglogistic") {
       for (i in 1:BS) {
-        rand <- simple.surv.sim(n, Inf,  dist.ev = "weibull", alpha, -log(beta),
+        rand <- simple.surv.sim(n, Inf,  dist.ev = "weibull", alpha, log(beta),
                                 dist.cens = "llogistic", 1 / alphaCens,
                                 log(betaCens))
         t[i] <- chisqcens1(rand$stop, rand$status, M, distr = "weibull",
                            params = list(shape = alpha, scale = beta))$Statistic
       }
     }
-    if (distrCens == "unif") {
+    if (distrCens == "uniform") {
       for (i in 1:BS) {
-        rand <- simple.surv.sim(n, Inf,  dist.ev = "weibull", alpha, -log(beta),
+        rand <- simple.surv.sim(n, Inf,  dist.ev = "weibull", alpha, log(beta),
                                 dist.cens = "unif", gammaCens, alphaCens)
         t[i] <- chisqcens1(rand$stop, rand$status, M, distr = "weibull",
                            params = list(shape = alpha, scale = beta))$Statistic
@@ -84,7 +83,7 @@ function(times, cens, M, distrData = c("weibull", "lognormal", "loglogistic"),
     if (distrCens == "weibull") {
       for (i in 1:BS) {
         rand <- simple.surv.sim(n, Inf, dist.ev = "lnorm", beta, mu,
-                                dist.cens = "weibull", alphaCens, -log(betaCens))
+                                dist.cens = "weibull", alphaCens, log(betaCens))
         t[i] <- chisqcens1(rand$stop, rand$status, M, distr = "lognormal",
                            params = list(shape = alpha, location = mu))$Statistic
       }
@@ -106,7 +105,7 @@ function(times, cens, M, distrData = c("weibull", "lognormal", "loglogistic"),
                            params = list(shape = alpha, location = mu))$Statistic
       }
     }
-    if (distrCens == "unif") {
+    if (distrCens == "uniform") {
       for (i in 1:BS) {
         rand <- simple.surv.sim(n, Inf, dist.ev = "lnorm", beta, mu,
                                 dist.cens = "unif", gammaCens, alphaCens)
@@ -120,7 +119,7 @@ function(times, cens, M, distrData = c("weibull", "lognormal", "loglogistic"),
       for (i in 1:BS) {
         rand <- simple.surv.sim(n, Inf,  dist.ev = "llogistic", 1 / alpha,
                                 log(beta), dist.cens = "weibull", alphaCens,
-                                -log(betaCens))
+                                log(betaCens))
         t[i] <- chisqcens1(rand$stop, rand$status, M, distr = "loglogistic",
                            params = list(shape = alpha, location = mu))$Statistic
       }
@@ -142,7 +141,7 @@ function(times, cens, M, distrData = c("weibull", "lognormal", "loglogistic"),
                            params = list(shape = alpha, scale = beta))$Statistic
       }
     }
-    if (distrCens == "unif") {
+    if (distrCens == "uniform") {
       for (i in 1:BS) {
         rand <- simple.surv.sim(n, Inf,  dist.ev = "llogistic", 1 / alpha,
                                 log(beta), dist.cens = "unif", gammaCens,
@@ -153,8 +152,9 @@ function(times, cens, M, distrData = c("weibull", "lognormal", "loglogistic"),
     }
   }
   pvalue <- 1 - ecdf(t)(tn)
-  output <- list(test = c("Statistic" = tn), "p-value" = pvalue,
-                 distrData = distrData, distrCens = distrCens,
+  output <- list(Statistic = tn, "p-value" = pvalue,
+                 "Data distribution" = distrData,
+                 "Censoring distribution" = distrCens,
                  Parameters = round(c(shape = alpha, location = mu,
                                       scale = beta), degs),
                  Cellnumber = c("Original" = M, "Final" = MF))

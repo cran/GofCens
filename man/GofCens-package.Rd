@@ -20,8 +20,8 @@
 \details{\tabular{ll}{
     Package: \tab GofCens\cr
     Type: \tab Package\cr
-    Version: \tab 0.91\cr
-    Date: \tab 2021-08-05\cr
+    Version: \tab 0.92\cr
+    Date: \tab 2022-01-05\cr
     License: \tab GPL (>= 2)\cr}
 }
 \author{Klaus Langohr, Mireia Besalú, Guadalupe Gómez

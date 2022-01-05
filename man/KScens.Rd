@@ -55,9 +55,9 @@ A list containing the following components:
 \item{\code{A}}{Value of the modified Kolmogorov-Smirnov statistic.}
 \item{\code{F(y_m)}}{Estimation of the image of the last recorded time.}
 \item{\code{y_m}}{Last recorded time.}
-\item{\code{distr}}{Null distribution.}
-\item{\code{param}}{List with the maximum likelihood estimates of the parameters 
-                    of the distribution under study.}
+\item{\code{Distribution}}{Null distribution.}
+\item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
+                         of the distribution under study.}
 }
 \references{
 T. R. Fleming et al. \emph{Modified Kolmogorov-Smirnov test procedure with application 

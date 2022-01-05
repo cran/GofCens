@@ -45,7 +45,7 @@ function(times, cens = rep(1, length(times)),
     }
     theorPP <- pexp(tim, rateExp)
     theorQQ <- qexp(1 - survTim, rateExp)
-    outp <- list(distr = "Exponential", scale = 1 / rateExp)
+    outp <- list(Distribution = "Exponential", scale = 1 / rateExp)
   }
   if (distr == "gumbel") {
     if (is.null(params$location) || is.null(params$scale)) {
@@ -64,7 +64,8 @@ function(times, cens = rep(1, length(times)),
     }
     theorPP <- pgumbel(tim, locGum, scaleGum)
     theorQQ <- qgumbel(1 - survTim, locGum, scaleGum)
-    outp <- list(distr = "Gumbel", location = locGum, scale = scaleGum)
+    outp <- list(Distribution = "Gumbel", Parameters = c(location = locGum,
+                                                         scale = scaleGum))
   }
   if (distr == "weibull") {
     if (is.null(params$shape) || is.null(params$scale)) {
@@ -77,7 +78,8 @@ function(times, cens = rep(1, length(times)),
     }
     theorPP <- pweibull(tim, shapeWei, scaleWei)
     theorQQ <- qweibull(1 - survTim, shapeWei, scaleWei)
-    outp <- list(distr = "Weibull", shape = shapeWei, scale = scaleWei)
+    outp <- list(Distribution = "Weibull", Parameters = c(shape = shapeWei,
+                                                          scale = scaleWei))
   }
   if (distr == "normal") {
     if (is.null(params$location) || is.null(params$scale)) {
@@ -90,7 +92,8 @@ function(times, cens = rep(1, length(times)),
     }
     theorPP <- pnorm(tim, locNorm, scaleNorm)
     theorQQ <- qnorm(1 - survTim, locNorm, scaleNorm)
-    outp <- list(distr = "Normal", location = locNorm, scale = scaleNorm)
+    outp <- list(Distribution = "Normal", Parameters = c(location = locNorm,
+                                                         scale = scaleNorm))
   }
   if (distr == "lognormal") {
     if (is.null(params$location) || is.null(params$scale)) {
@@ -103,7 +106,8 @@ function(times, cens = rep(1, length(times)),
     }
     theorPP <- plnorm(tim, locLnorm, scaleLnorm)
     theorQQ <- qlnorm(1 - survTim, locLnorm, scaleLnorm)
-    outp <- list(distr = "Log-normal", location = locLnorm, scale = scaleLnorm)
+    outp <- list(Distribution = "Log-normal", Parameters = c(location = locLnorm,
+                                                             scale = scaleLnorm))
   }
   if (distr == "logistic") {
     if (is.null(params$location) || is.null(params$scale)) {
@@ -116,7 +120,8 @@ function(times, cens = rep(1, length(times)),
     }
     theorPP <- plogis(tim, locLogis, scaleLogis)
     theorQQ <- qlogis(1 - survTim, locLogis, scaleLogis)
-    outp <- list(distr = "Logistic", location = locLogis, scale = scaleLogis)
+    outp <- list(Distribution = "Logistic", Parameters = c(location = locLogis,
+                                                           scale = scaleLogis))
   }
   if (distr == "loglogistic") {
     if (is.null(params$shape) || is.null(params$scale)) {
@@ -130,8 +135,8 @@ function(times, cens = rep(1, length(times)),
     }
     theorPP <- pllogis(tim, shapeLoglog, scale = scaleLoglog)
     theorQQ <- qllogis(1 - survTim, shapeLoglog, scale = scaleLoglog)
-    outp <- list(distr = "Log-logistic", shape = shapeLoglog,
-                 scale = scaleLoglog)
+    outp <- list(Distribution = "Log-logistic", Parameters = c(shape = shapeLoglog,
+                                                               scale = scaleLoglog))
   }
   if (distr == "beta") {
     aBeta <- betaLimits[1]
@@ -147,10 +152,11 @@ function(times, cens = rep(1, length(times)),
     theorPP <- pbeta((tim - aBeta)/(bBeta - aBeta), shape1Beta, shape2Beta)
     theorQQ <- qbeta((1 - survTim), shape1Beta, shape2Beta) * (bBeta - aBeta)
                + aBeta
-    outp <- list(distr = "Beta", shape1 = shape1Beta, shape2 = shape2Beta,
+    outp <- list(Distribution = "Beta", Parameters = c(shape1 = shape1Beta,
+                                                       shape2 = shape2Beta),
                  interval.domain = betaLimits)
   }
-  old <- options(digits = 2)
+  old <- options(digits = 7)
   on.exit(options(old))
   options(digits = decdig)
   index <- 0
@@ -202,7 +208,7 @@ function(times, cens = rep(1, length(times)),
     if ("SP" %in% plots) {
       plot(2 / pi * asin(sqrt(1 - survTim)), 2 / pi * asin(sqrt(theorPP)),
            col = colour[2 %% nCol + 1],
-           xlab = expression(bold(2 / pi %*% arcsin(hat(F)(t)^{1/2}))),
+           xlab = expression(bold(2 / pi %*% arcsin(hat(F)[n](t)^{1/2}))),
            ylab = expression(bold(2 / pi %*% arcsin(hat(F)[0](t)^{1/2}))),
            main = "SP plot")
       abline(0, 1)
@@ -215,7 +221,7 @@ function(times, cens = rep(1, length(times)),
       abline(0, 1)
     }
     if (mtitle) {
-      title(paste("Probability plots for a", outp$distr, "distribution"),
+      title(paste("Probability plots for a", outp$Distribution, "distribution"),
             outer = TRUE, cex.main = 1.5)
     }
   } else {
@@ -241,7 +247,7 @@ function(times, cens = rep(1, length(times)),
                vjust = -1, size = 6, fontface = "bold")
     SP <- ggplot(data = ggdat, aes(x = SPx, y = SPy)) +
       geom_point(colour = colour[2 %% nCol + 1]) +
-      xlab(expression(bold(2 / pi %*% arcsin(hat(F)(t)^{1/2})))) +
+      xlab(expression(bold(2 / pi %*% arcsin(hat(F)[n](t)^{1/2})))) +
       ylab(expression(bold(2 / pi %*% arcsin(hat(F)[0](t)^{1/2})))) +
       geom_abline(intercept = 0) +
       annotate("text", label = "SP plot", x = Inf, y = -Inf, hjust = 1,
@@ -256,8 +262,8 @@ function(times, cens = rep(1, length(times)),
     plolis <- list(PP, QQ, SP, ER)[c("PP", "QQ", "SP", "ER") %in% plots]
     if (mtitle) {
       grid.arrange(grobs = plolis, layout_matrix = m,
-                   top = textGrob(paste("Probability plots for a", outp$distr,
-                                        "distribution"),
+                   top = textGrob(paste("Probability plots for a",
+                                        outp$Distribution, "distribution"),
                    gp = gpar(fontsize = 15, font = 2)))
     } else {
       grid.arrange(grobs = plolis, layout_matrix = m)

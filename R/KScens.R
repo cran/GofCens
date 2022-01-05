@@ -30,10 +30,10 @@ function(times, cens = rep(1, length(times)),
     if (is.null(beta)) {
       muu <- unname(coefficients(survreg(Surv(times, cens) ~ 1,
                                          dist = "exponential")))
-      beta <- exp(-muu)
+      beta <- 1 / exp(-muu)
     }
     SofT0 <- function(x, alpha, gamma, mu, beta) {
-      1 - pexp(x, beta)
+      1 - pexp(x, 1/ beta)
     }
   }
   if (distr == "gumbel") {
