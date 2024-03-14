@@ -5,8 +5,8 @@ function(times, cens = rep(1, length(times)),
                      plots = c("PP", "QQ", "SP", "ER"),
                      colour = c("green4", "deepskyblue4", "yellow3",
                                 "mediumvioletred"), betaLimits = c(0, 1),
-                     igumb = c(10, 10), mtitle = TRUE, ggplo = FALSE, m = NULL,
-                     prnt = TRUE, decdig = 7,
+                     igumb = c(10, 10), mtitle = TRUE, ggp = FALSE, m = NULL,
+                     prnt = TRUE, degs = 3,
                      params = list(shape = NULL, shape2 = NULL,
                                    location = NULL, scale = NULL), ...) {
   if (!is.numeric(times)) {
@@ -18,8 +18,8 @@ function(times, cens = rep(1, length(times)),
   if (any(!cens %in% 0:1)) {
     stop("Censoring status must be either 0 or 1!")
   }
-  if (!is.logical(ggplo) || !is.logical(prnt)) {
-    stop("ggplo and prnt must be logicals!")
+  if (!is.logical(ggp) || !is.logical(prnt)) {
+    stop("ggp and prnt must be logicals!")
   }
   distr <- match.arg(distr)
   if (distr == "beta" && any(times < betaLimits[1] | times > betaLimits[2])) {
@@ -45,7 +45,7 @@ function(times, cens = rep(1, length(times)),
     }
     theorPP <- pexp(tim, rateExp)
     theorQQ <- qexp(1 - survTim, rateExp)
-    outp <- list(Distribution = "Exponential", scale = 1 / rateExp)
+    outp <- list(Distribution = "Exponential", Parameters = 1 / rateExp)
   }
   if (distr == "gumbel") {
     if (is.null(params$location) || is.null(params$scale)) {
@@ -156,9 +156,7 @@ function(times, cens = rep(1, length(times)),
                                                        shape2 = shape2Beta),
                  interval.domain = betaLimits)
   }
-  old <- options(digits = 7)
-  on.exit(options(old))
-  options(digits = decdig)
+
   index <- 0
   for (i in 1:length(uPoint)) {
     while (theorQQ[i] > empiricF[1, index + 1]) {
@@ -185,7 +183,7 @@ function(times, cens = rep(1, length(times)),
       }
     }
   }
-  if (!ggplo) {
+  if (!ggp) {
     oldpar <- par(no.readonly = TRUE)
     on.exit(par(oldpar))
     layout(m)
@@ -270,6 +268,30 @@ function(times, cens = rep(1, length(times)),
     }
   }
   if (prnt) {
-    return(outp)
+    cat("Parameter Estimates\n")
+    cat(" ", "\n")
+    for (dist in distr) {
+      if (!is.null(outp$Parameters)) {
+        cat(dist, ":\n", sep = "")
+        if (dist %in% c("gumbel", "weibull", "normal", "logistic", "lognormal",
+                        "loglogistic")) {
+          if ("location" %in% names(outp$Parameters)) {
+            cat("Location:", round(outp$Parameters[1], degs), "\n")
+          }
+          cat("   Scale:", round(outp$Parameters[2], degs), "\n")
+          if ("shape" %in% names(outp$Parameters)) {
+            cat("   Shape:", round(outp$Parameters[1], degs), "\n")
+          }
+        } else if (dist == "exponential") {
+          cat("Scale:",  round(outp$Parameters,degs), "\n")
+        } else {
+          cat("  Shape1:", round(outp$Parameters[1], degs), "\n")
+          cat("  Shape2:", round(outp$Parameters[2], degs), "\n")
+          cat("  Domain:", round(outp$interval.domain[1], degs), "-",
+                           round(outp$interval.domain[2], degs), "\n")
+        }
+        cat("\n")
+      }
+    }
   }
 }

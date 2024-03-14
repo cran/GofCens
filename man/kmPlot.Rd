@@ -1,0 +1,81 @@
+\name{kmPlot}
+\alias{kmPlot}
+
+\title{Plot of the Kaplen-Meier and parametric estimations}
+\description{
+  Function \code{kmPlot} is a function that generates a plot that combines a 
+  Kaplan-Meier survival curve and a parametric survival curve in the same graph. 
+  It is useful for comparing non-parametric survival estimates with the fitted 
+  parametric survival model.
+}
+
+\usage{
+kmPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1, 
+       betaLimits = c(0, 1), igumb = c(10, 10), ggp = FALSE, m = NULL,
+       prnt = TRUE, degs = 3, ...)
+}
+
+\arguments{
+  \item{times}{Numeric vector of times until the event of interest.}
+  \item{cens}{Status indicator (1, exact time; 0, right-censored time). If not 
+    provided, all times are assumed to be exact.}
+  \item{distr}{A string specifying the name of the distribution to be studied. 
+    The possible distributions are  
+    the Weibull (\code{"weibull"}), the Gumbel (\code{"gumbel"}), 
+    the normal (\code{"normal"}), the lognormal (\code{"lognormal"}),
+    the logistic (\code{"logistic"}), the loglogistic (\code{"loglogistic"}),
+    the exponential (\code{"exponential"})
+    and the beta (\code{"beta"}) distribution. Default is \code{"all6"} and 
+    includes the fisrt 6 listed which are the most used distributions.}
+  \item{colour}{Vector indicating the colours of the displayed plots.}
+  \item{betaLimits}{Two-components vector with the lower and upper bounds of the 
+    Beta distribution. This argument is only required, if the beta
+    distribution is considered.}
+  \item{igumb}{Two-components vector with the initial values for the estimation of 
+    the Gumbel distribution parameters.} 
+  \item{ggp}{Logical to use or not the \pkg{ggplot2} package to draw the plots. 
+             Default is \code{FALSE}.}
+  \item{m}{Optional layout for the plots to be displayed.}
+  \item{prnt}{Logical to indicate if the maximum likelihood estimates of the 
+    parameters should be printed. Default is \code{TRUE}.}
+  \item{degs}{Integer indicating the number of decimal places of the numeric 
+              results of the output.}
+  \item{\dots}{Optional arguments for function \code{par}, if \code{ggp = FALSE}.}
+}
+
+\details{
+  The parameter estimation is acomplished with the \code{fitdistcens} 
+  function of the \pkg{fitdistrplus} package.
+}
+
+\value{
+  If \code{prnt = TRUE}, a list containing the following components
+  \item{\code{Distribution}}{Distribution under study.}
+  \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
+    of the distribution under study.}
+}
+
+\references{
+  Peterson Jr, Arthur V. \emph{Expressing the Kaplan-Meier estimator as a function of empirical subsurvival functions}. 
+  In: Journal of the American Statistical Association 72.360a (1977): 854-858.
+}
+
+\author{K. Langohr, M. Besalú, M. Francisco, G. Gómez.}
+
+\examples{
+  # Plots for complete data and default distributions
+  set.seed(123)
+  x <- rexp(1000, 0.1)
+  kmPlot(x)
+
+  # Plots for censored data using ggplot2
+  library(survival)
+  colonsamp <- colon[sample(nrow(colon), 100), ]
+  kmPlot(colonsamp$time, colonsamp$status, distr= "lognormal", ggp = TRUE) 
+  
+  # Plots for censored data from three distributions
+  data(nba)
+  kmPlot(nba$survtime, nba$cens, distr = c("normal", "weibull", "lognormal"), 
+         prnt = FALSE)
+}
+

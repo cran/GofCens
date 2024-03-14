@@ -1,22 +1,19 @@
-\name{gofcens}
-\alias{gofcens}
-\title{Kolmogorov-Smirnov, Cramér-von Mises, and Anderson-Darling statistics for 
-       complete and right-censored data}
+\name{CvMcens}
+\alias{CvMcens}
+\title{Cramér-von Mises test for complete and right-censored data}
 \description{
-\code{gofcens} computes the Kolmogorov-Smirnov, Cramér-von Mises, and 
-Anderson-Darling statistics ans p-values for complete and right-censored data against 
-eight possible distributions.
+\code{CvMcens} computes the Cramér-von Mises statistic and p-value for complete 
+and right-censored data against eight possible distributions.
 }
-
 \usage{
-gofcens(times, cens = rep(1, length(times)), 
-        distr = c("exponential", "gumbel", "weibull", "normal", 
-                  "lognormal", "logistic", "loglogistic", "beta"), 
-        betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, BS = 999, 
-        params = list(shape = NULL, shape2 = NULL, location = NULL, 
-                      scale = NULL), outp = "list")
+CvMcens(times, cens = rep(1, length(times)),
+        distr = c("exponential", "gumbel", "weibull", "normal",
+                  "lognormal", "logistic", "loglogistic", "beta"),
+        betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, BS = 999,
+        params = list(shape = NULL, shape2 = NULL,
+                      location = NULL, scale = NULL),
+        prnt = TRUE, outp = "list", tol = 1e-04)
 }
-
 \arguments{
   \item{times}{Numeric vector of times until the event of interest.}
   \item{cens}{Status indicator (1, exact time; 0, right-censored time). If not 
@@ -39,36 +36,38 @@ gofcens(times, cens = rep(1, length(times)),
                 By default, parameters are set to \code{NULL} and estimated with 
                 the maximum likelihood method. This argument is only considered, 
                 if all parameters of the studied distribution are specified.}
-  \item{outp}{Indicator of how the output will be displayed. The possible formats are \code{list} and \code{table}.}
+  \item{outp}{Indicator of how the output will be displayed. The possible formats are                        
+  \code{list} and \code{table}.}
+  \item{prnt}{Logical to indicate if the estimations of the Anderson-Darling statistic and p-value should be printed. Default is \code{TRUE}.}
+  \item{tol}{Precision of survival times.}
 }
-
-\details{Fleming et al. (1980) proposed a modified Kolmogorov-Smirnov test to be 
-         used with right-censored data. Koziol and Green (1976) proposed a Cramér-von 
+\details{
+         Koziol and Green (1976) proposed a Cramér-von 
          Mises statistic for randomly censored data. This function reproduces 
          this test for a given survival data and a theorical distribution. In 
          presence of ties, different authors provide slightly different definitions 
          of the product-limit estimator, what might provide different values of 
          the test statistic.  
+         When dealing with complete data, we recommend to use the function 
+         \code{cvm.test} of the \pkg{goftest} package.
          
-         When dealing with complete data, we recommend the use of functions 
-         \code{\link[stats]{ks.test}} of the \pkg{stats} package and 
-         \code{cvm.test} and \code{ad.test} of the \pkg{goftest} package. 
+         The parameter estimation is acomplished with the \code{fitdistcens} 
+         function of the \pkg{fitdistrplus} package.
+         
+         The precision of the survival times is important mainly in 
+         the data generation step of the bootstrap samples.
 }
-
 \value{
-A list containing the following components
- \item{\code{Distribution}}{Null distribution.}
- \item{\code{Tests statistics}}{Values of the Kolmogovor-Smirnov, Cramér-von Mises,
-       and Anderson-Darling test statistics.}
- \item{\code{p-value}}{P-values associated with each test.}
- \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
-                          of the distribution under study.}
+If \code{prnt = TRUE}, a list containing the following components:
+  \item{\code{Distribution }}{Null distribution.}
+  \item{\code{CvM}}{Value of Cramér-von Mises statistic.}
+  \item{\code{p-value}}{Estimated p-value.}
+  \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
+                           of the distribution under study.}
+The list is also returned invisibly.
 }
 
 \references{
-T. R. Fleming et al. \emph{Modified Kolmogorov-Smirnov test procedure with application 
-to arbitrarily right-censored data}. In: Biometrics 36 (1980), 607-625.
-
 J. A. Koziol and S. B. Green. \emph{A Cramér-von Mises statistic for randomly 
 censored data}. In: Biometrika, 63 (3) (1976), 465-474.
 
@@ -82,21 +81,21 @@ for censored data.} In: Biometrika, 63 (2) (1976), 291-298.
                    limit the number of random censored samples generated and 
                    reduce the execution time.} 
 
-\seealso{\link[stats]{ks.test} (Package \code{stats}), \code{cvm.test} 
-         (Package \code{goftest}), and \code{ad.test} 
-         (Package \code{goftest}) for complete data, and \link{KScens} for the 
-         Kolmogorov-Smirnov test for right-censored data, which returns the p-value.
+\seealso{Function \code{cvm.test} (Package \pkg{goftest}) for complete data and 
+         \link{gofcens} for statistics and p-value of Kolmogorov-Smirnov, 
+         Cramér von-Mises and Anderson-Darling together for right-censored data.
 }
 
 \examples{
-\dontrun{
 # Complete data
 set.seed(123)
-gofcens(times = rweibull(100, 12, scale = 4), distr = "weibull", BS = 499)
+CvMcens(times = rweibull(100, 12, scale = 4), distr = "weibull",
+       BS = 199)
 
+\dontrun{
 # Censored data
 library(survival)
 colonsamp <- colon[sample(nrow(colon), 100), ]
-gofcens(colonsamp$time, colonsamp$status, distr = "normal")
+CvMcens(colonsamp$time, colonsamp$status, distr = "normal")
 }
 }

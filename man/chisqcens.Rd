@@ -1,18 +1,21 @@
-\name{chisqcens1}
-\alias{chisqcens1}
+\name{chisqcens}
+\alias{chisqcens}
 \title{General chi-squared statistics for right-censored data.}
 \description{
-\code{chisqcens1} computes the general chi-squared statistic for right-censored 
-data introduced by Kim (1993).}
+  Function \code{chisqcens} computes the general chi-squared test statistic for 
+  right-censored data introduced by Kim (1993) and the respective p-value 
+  using bootstrapping.}
+
 \usage{
-chisqcens1(times, cens = rep(1, length(times)), M, 
-           distr = c("exponential", "gumbel", "weibull", "normal", 
-                     "lognormal", "logistic", "loglogistic", "beta", 
-                     "uniform"), 
-           betaLimits = c(0, 1), igumb = c(10, 10), degs = 4, 
-           params = list(shape = NULL, shape2 = NULL, location = NULL, 
-                         scale = NULL))
+chisqcens(times, cens = rep(1, length(times)), M,
+          distr = c("exponential", "gumbel", "weibull", "normal",
+                    "lognormal", "logistic", "loglogistic", "beta"),
+          betaLimits=c(0, 1), igumb = c(10, 10), degs = 3, BS = 999,
+          params = list(shape = NULL, shape2 = NULL,
+                        location = NULL, scale = NULL),
+          prnt = TRUE, outp = "list", tol = 1e-04)
 }
+
 \arguments{
   \item{times}{Numeric vector of times until the event of interest.}
   \item{cens}{Status indicator (1, exact time; 0, right-censored time). If not 
@@ -23,8 +26,7 @@ chisqcens1(times, cens = rep(1, length(times)), M,
                the Weibull (\code{"weibull"}), the Gumbel (\code{"gumbel"}), 
                the normal (\code{"normal"}), the lognormal (\code{"lognormal"}),
                the logistic (\code{"logistic"}), the loglogistic (\code{"loglogistic"}),
-               the beta (\code{"beta"}), and the uniform (\code{"uniform"}) 
-               distribution.}
+               and the beta (\code{"beta"}) distribution.}
   \item{betaLimits}{Two-components vector with the lower and upper bounds of the 
                     Beta distribution. This argument is only required, if the beta
                     distribution is considered.}
@@ -32,11 +34,18 @@ chisqcens1(times, cens = rep(1, length(times)), M,
                of the Gumbel distribution parameters.}
   \item{degs}{Integer indicating the number of decimal places of the numeric 
               results of the output.}
+  \item{BS}{Number of bootstrap samples.}
   \item{params}{List specifying the parameters of the theoretical distribution. 
                 By default, parameters are set to \code{NULL} and estimated with 
                 the maximum likelihood method. This argument is only considered, 
                 if all parameters of the studied distribution are specified.}
+  \item{outp}{Indicator of how the output will be displayed. The possible formats are                        
+              \code{list} and \code{table}.}
+  \item{prnt}{Logical to indicate if the estimations of the Anderson-Darling statistic and 
+              p-value should be printed. Default is \code{TRUE}.}
+  \item{tol}{Precision of survival times.}
 }
+
 \details{The function implements the test introduced by Kim (1993) and returns 
          the value of the test statistic. 
          
@@ -47,37 +56,43 @@ chisqcens1(times, cens = rep(1, length(times)), M,
          provided by the user is reduced. 
 
          The parameter estimation is acomplished with the \code{fitdistcens} 
-         function of the \pkg{fitdistrplus} package.}
+         function of the \pkg{fitdistrplus} package.
+         
+         The precision of the survival times is important mainly in 
+         the data generation step of the bootstrap samples.
+}
+
 \value{
-A list containing the following components
- \item{\code{Statistic }}{Value of the test statistic.}
+If \code{prnt = TRUE}, a list containing the following components:
  \item{\code{Distribution }}{Null distribution.}
+ \item{\code{Statistic}}{Value of the test statistic.}
+ \item{\code{p-value}}{Estimated p-value.}
  \item{\code{Parameters }}{The values of the parameters of the null distribution. 
-                          If the user has set the parameters manually, these will 
-                          be the returned parameters, otherwise the maximum 
-                          likelihood estimates are returned.}
+                           If the user has set the parameters manually, these will 
+                           be the returned parameters, otherwise the maximum 
+                           likelihood estimates are returned.}
  \item{\code{CellNumber}}{Vector with two values: the original cell number 
                           introduced by the user and the final cell number used.}
+The list is also returned invisibly.
 }
-\references{
-J. H. Kim. \emph{Chi-Square Goodness-of-Fit Tests for Randomly Censored Data.} 
-In: The Annals of Statistics, 21 (3) (1993), 1621-1639.
-}
-\author{K. Langohr, M. Besalú, G. Gómez.}
 
-\seealso{
-\link{chisqcens2} for the computation of the p-value.
+\references{
+  J. H. Kim. \emph{Chi-Square Goodness-of-Fit Tests for Randomly Censored Data.} 
+  In: The Annals of Statistics, 21 (3) (1993), 1621-1639.
 }
+
+\author{K. Langohr, M. Besalú, M. Francisco, G. Gómez.}
+
 \examples{
 # Complete data
 set.seed(123)
-chisqcens1(time = rgumbel(1000, 12, scale = 4), M = 8, distr = "gumbel")
+chisqcens(time = rgumbel(100, 12, scale = 4), M = 8, distr = "gumbel",
+          BS = 99)
 
+\dontrun{
 # Censored data
 library(survival)
-chisqcens1(aml$time, aml$status, M = 6, distr = "weibull")
-
-data(nba)
-chisqcens1(nba$survtime, nba$cens, 10, "logis", degs = 2)
-chisqcens1(nba$survtime, nba$cens, 10, "beta", betaLimits = c(0, 70))
+colonsamp <- colon[sample(nrow(colon), 100), ]
+chisqcens(colonsamp$time, colonsamp$status, M = 6, distr = "normal")
+}
 }

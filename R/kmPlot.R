@@ -1,4 +1,4 @@
-cumhazPlot <-
+kmPlot <-
   function(times, cens = rep(1, length(times)),
            distr = "all6", colour = 1, betaLimits = c(0, 1),
            igumb = c(10, 10), ggp = FALSE, m = NULL,
@@ -10,7 +10,7 @@ cumhazPlot <-
       stop("Times must be strictly positive!")
     }
     if (any(!cens %in% 0:1)) {
-      stop("Censoring status must be either 0 or 1!")
+      stop("Status indicator must be either 0 or 1!")
     }
     if (!is.logical(ggp) || !is.logical(prnt)) {
       stop("ggp and prnt must be logicals!")
@@ -33,28 +33,21 @@ cumhazPlot <-
       stop("No distribution to be fitted!")
     }
     dd <- data.frame(left = as.vector(times), right = ifelse(cens == 1, times, NA))
-    survNA <- survfit(Surv(times, cens) ~ 1, stype = 2, ctype = 1)
-    Haz <- -log(summary(survNA)$surv)
-    tim <- summary(survNA)$time
+    survKM <- survfit(Surv(times, cens) ~ 1)
+    mxtime <- max(survKM$time)
+    sqtime <- seq(0, mxtime, length.out = 1001)
     genlis <- vector("list", length(distributions))
     names(genlis) <- distributions
-    for (v in c("params", "xscale", "yscale", "xlabs", "ylabs", "regline",
-                "titl")) {
+    for (v in c("params", "srvline", "titl")) {
       assign(v, genlis)
     }
-    xla = "Time"
-    xlogla = "Log(Time)"
     if ("exponential" %in% distributions) {
       tryCatch({
         fitExpo <- fitdistcens(dd, "exp")
         rateExpo <- fitExpo$estimate[1]
         params$exponential <- 1 / rateExpo
         names(params$exponential) <- "scale"
-        xscale$exponential <- tim
-        yscale$exponential <- Haz
-        xlabs$exponential <- xla
-        ylabs$exponential <- expression(bolditalic(hat(Lambda)(Time)))
-        regline$exponential <- rateExpo * tim
+        srvline$exponential <- 1 - pexp(sqtime, rateExpo)
         titl$exponential <- "Exponential"
       }, error = function(e) e)
     }
@@ -65,13 +58,9 @@ cumhazPlot <-
         scaleGumb <- fitGumb$estimate[2]
         params$gumbel <- c(locGumb, scaleGumb)
         names(params$gumbel) <- c("location", "scale")
-        xscale$gumbel <- tim
-        yscale$gumbel <- -log(-log(1 - exp(-Haz)))
-        xlabs$gumbel <- xla
-        ylabs$gumbel <- expression(bolditalic(-log(-log(1 - exp(-hat(Lambda)(Time))))))
-        regline$gumbel <- (tim - locGumb) / scaleGumb
+        srvline$gumbel <- 1 - pgumbel(sqtime, locGumb, scaleGumb)
         titl$gumbel <- "Gumbel"
-      }, error = function(e) e)
+      }, error = function(e) {warning("Problem fitting Gumbel distribution, try other initial values.", immediate. = TRUE)})
     }
     if ("weibull" %in% distributions) {
       tryCatch({
@@ -79,11 +68,7 @@ cumhazPlot <-
         shapeWei <- fitWei$estimate[1]
         scaleWei <- fitWei$estimate[2]
         params$weibull <- c(shapeWei, scaleWei)
-        xscale$weibull <- log(tim)
-        yscale$weibull <- log(Haz)
-        xlabs$weibull <- xlogla
-        ylabs$weibull <- expression(bolditalic(log(hat(Lambda)(Time))))
-        regline$weibull <- shapeWei * (-log(scaleWei) + log(tim))
+        srvline$weibull <- 1 - pweibull(sqtime, shapeWei, scaleWei)
         titl$weibull <- "Weibull"
       }, error = function(e) e)
     }
@@ -94,11 +79,7 @@ cumhazPlot <-
         scaleNorm <- fitNorm$estimate[2]
         params$normal <- fitNorm$estimate
         names(params$normal) <- c("location", "scale")
-        xscale$normal <- tim
-        yscale$normal <- qnorm(1 - exp(-Haz))
-        xlabs$normal <- xla
-        ylabs$normal <- expression(bolditalic(paste(Phi^-1,(1 - exp(-hat(Lambda)(Time))))))
-        regline$normal <- (tim - locNorm) / scaleNorm
+        srvline$normal <- 1 - pnorm(sqtime, locNorm, scaleNorm)
         titl$normal <- "Normal"
       }, error = function(e) e)
     }
@@ -108,11 +89,7 @@ cumhazPlot <-
         locLogis <- fitLog$estimate[1]
         scaleLogis <- fitLog$estimate[2]
         params$logistic <- fitLog$estimate
-        xscale$logistic <- tim
-        yscale$logistic <- log(exp(Haz) - 1)
-        xlabs$logistic <- xla
-        ylabs$logistic <- expression(bolditalic(log(exp(hat(Lambda)(Time)) - 1)))
-        regline$logistic <- (tim - locLogis) / scaleLogis
+        srvline$logistic <- 1 - plogis(sqtime, locLogis, scaleLogis)
         titl$logistic <- "Logistic"
       }, error = function(e) e)
     }
@@ -123,11 +100,7 @@ cumhazPlot <-
         scaleLnorm <- fitLnorm$estimate[2]
         params$lognormal <- c(locLnorm, scaleLnorm)
         names(params$lognormal) <- c("location", "scale")
-        xscale$lognormal <- log(tim)
-        yscale$lognormal <- qnorm(1 - exp(-Haz))
-        xlabs$lognormal <- xlogla
-        ylabs$lognormal <- expression(bolditalic(paste(Phi^-1,(1 - exp(-hat(Lambda)(Time))))))
-        regline$lognormal <- (log(tim) - locLnorm)/scaleLnorm
+        srvline$lognormal <- 1 - plnorm(sqtime, locLnorm, scaleLnorm)
         titl$lognormal <- "Lognormal"
       }, error = function(e) e)
     }
@@ -137,11 +110,7 @@ cumhazPlot <-
         shapeLoglogis <- fitLoglog$estimate[1]
         scaleLoglogis <- fitLoglog$estimate[2]
         params$loglogistic <- c(shapeLoglogis, scaleLoglogis)
-        xscale$loglogistic <- log(tim)
-        yscale$loglogistic <- log(exp(Haz) - 1)
-        xlabs$loglogistic <- xlogla
-        ylabs$loglogistic <- expression(bolditalic(log(exp(hat(Lambda)(Time) - 1))))
-        regline$loglogistic <- shapeLoglogis * (log(tim) - log(scaleLoglogis))
+        srvline$loglogistic <- 1 - pllogis(sqtime, shapeLoglogis, scale = scaleLoglogis)
         titl$loglogistic <- "Log-logistic"
       }, error = function(e) e)
     }
@@ -154,11 +123,8 @@ cumhazPlot <-
         shape2Beta <- fitBeta$estimate[2]
         params$beta <- list(parameters = c(shape1Beta, shape2Beta),
                             domain = betaLimits)
-        xscale$beta <- tim
-        yscale$beta <- qbeta(1 - exp(-Haz), shape1Beta, shape2Beta)
-        xlabs$beta <- xla
-        ylabs$beta <- expression(bolditalic(paste(F^-1,(1 - exp(-hat(Lambda)(Time))))))
-        regline$beta <- (tim - aBeta) / (bBeta - aBeta)
+        srvline$beta <- 1 - pbeta((sqtime - aBeta)/(bBeta - aBeta), shape1Beta,
+                                  shape2Beta)
         titl$beta <- "Beta"
       }, error = function(e) e)
     }
@@ -171,28 +137,30 @@ cumhazPlot <-
       oldpar <- par(no.readonly = TRUE)
       on.exit(par(oldpar))
       layout(m)
-      par(pch = 16, las = 1, mar = c(4, 4.5, 2, 1), font.lab = 3, ...)
+      par(pch = 16, las = 1, mar = c(4, 4.5, 2, 1), font.lab = 4, ...)
       for (i in distributions) {
-        if (!is.null(xscale[[i]])) {
-          plot(xscale[[i]], yscale[[i]], col = colour, xlab = xlabs[[i]],
-               ylab = ylabs[[i]], main = titl[[i]])
-          lines(xscale[[i]], regline[[i]])
-        }
+        plot(survKM, col = colour, xlab = "Time",
+             ylab = expression(bolditalic(hat(S)(t))), main = titl[[i]])
+        lines(sqtime, srvline[[i]])
       }
     } else {
       plolis <- vector("list", length(distributions))
       names(plolis) <- distributions
       for (i in distributions) {
-        if (!is.null(xscale[[i]])) {
+        if (!is.null(srvline[[i]])) {
           plolis[[i]] <- local({
             i <- i
-            p1 <- ggplot(mapping = aes(x = xscale[[i]], y = yscale[[i]])) +
-              geom_point(colour = colour) +
-              geom_segment(aes(x = xscale[[i]][1], y = regline[[i]][1],
-                               xend = rev(xscale[[i]])[1], yend = rev(regline[[i]])[1])) +
-              labs(title = titl[[i]], size = 6, fontface = "bold") +
-              xlab(xlabs[[i]]) +
-              ylab(ylabs[[i]])
+            tmpdat <- data.frame(x = sqtime, y = srvline[[i]])
+            p1 <- ggsurvplot(survKM, data = data.frame(times, cens),
+                             ggtheme = theme_minimal(),
+                             xlab = expression(bolditalic(Time)),
+                             ylab = expression(bolditalic(hat(S)(t))),
+                             censor = FALSE, legend = "none",
+                             title = titl[[i]],
+                             font.main = c(14, "bold", "black"),
+                             palette = colour)$plot +
+              geom_point(aes(tmpdat$x, tmpdat$y), size = 1, data = tmpdat) +
+              geom_line(aes( tmpdat$x, tmpdat$y), data = tmpdat)
           })
         }
       }
@@ -206,23 +174,23 @@ cumhazPlot <-
           cat(dist, ":\n", sep = "")
           if (dist %in% c("gumbel", "weibull", "normal", "logistic", "lognormal",
                           "loglogistic")) {
-            cat("   Scale:", round(params[[dist]][2], digits = degs), "\n")
+            cat("   Scale:", round( params[[dist]][2], degs), "\n")
             if ("location" %in% names(params[[dist]])) {
-              cat("Location:", round(params[[dist]][1], digits = degs), "\n")
+              cat("Location:", round(params[[dist]][1], degs), "\n")
             }
             if ("shape" %in% names(params[[dist]])) {
-              cat("   Shape:", round(params[[dist]][1], digits = degs), "\n")
+              cat("   Shape:", round(params[[dist]][1], degs), "\n")
             }
-          } else if(dist=="exponential"){
-            cat("Scale:", round(params[[dist]][1], digits = degs), "\n")
-          } else {
-            cat("  Shape1:", round(params[[dist]]$parameters[1], digits = degs), "\n")
-            cat("  Shape2:", round(params[[dist]]$parameters[2], digits = degs), "\n")
-            cat("  Domain:", round(params[[dist]]$domain[1], digits = degs), "-",
-                round(params[[dist]]$domain[2],degs), "\n")
+          } else if(dist == "exponential") {
+            cat("Scale:", round(params[[dist]], digits = degs), "\n")
+          } else if (dist == "beta") {
+            cat("  Shape1:", round(params[[dist]]$parameters[1], degs), "\n")
+            cat("  Shape2:", round(params[[dist]]$parameters[2], degs), "\n")
+            cat("  Domain:", round(params[[dist]]$domain[1],degs), "-",
+                             round(params[[dist]]$domain[2],degs), "\n")
           }
           cat("\n")
         }
       }
-    }
-  }
+   }
+}

@@ -12,8 +12,8 @@ probPlot(times, cens = rep(1, length(times)),
                    "lognormal", "logistic", "loglogistic", "beta"), 
          plots = c("PP", "QQ", "SP", "ER"), 
          colour = c("green4", "deepskyblue4", "yellow3", "mediumvioletred"), 
-         betaLimits = c(0, 1), igumb = c(10, 10), mtitle = TRUE, ggplo = FALSE, 
-         m = NULL, prnt = TRUE, decdig = 7, 
+         betaLimits = c(0, 1), igumb = c(10, 10), mtitle = TRUE, ggp = FALSE, 
+         m = NULL, prnt = TRUE, degs = 3, 
          params = list(shape = NULL, shape2 = NULL, location = NULL, 
                        scale = NULL), ...)
 }
@@ -43,18 +43,18 @@ probPlot(times, cens = rep(1, length(times)),
                of the Gumbel distribution parameters.}
   \item{mtitle}{Logical to add or not the title "Probability plots for a \code{distr}
                 distribution" to the plot. Default is \code{TRUE}.}
-  \item{ggplo}{Logical to use or not the \pkg{ggplot2} package to draw the plots. 
+  \item{ggp}{Logical to use or not the \pkg{ggplot2} package to draw the plots. 
                Default is \code{FALSE}.}
   \item{m}{Optional layout for the plots to be displayed.}
   \item{prnt}{Logical to indicate if the maximum likelihood estimates of the 
               parameters should be printed. Default is \code{TRUE}.}
-  \item{decdig}{Number of significant (see \code{\link[base]{signif}}) digits to print
-                when printing the parameter estimates. It is a suggestion only.}
+  \item{degs}{Integer indicating the number of decimal places of the numeric 
+              results of the output.}
   \item{params}{List specifying the parameters of the theoretical distribution. 
                 By default, parameters are set to \code{NULL} and estimated with 
                 the maximum likelihood method. This argument is only considered, 
                 if all parameters of the studied distribution are specified.}
-  \item{\dots}{Optional arguments for function \code{par}, if \code{ggplo = FALSE}.}
+  \item{\dots}{Optional arguments for function \code{par}, if \code{ggp = FALSE}.}
 }
 \details{By default, function \code{probPlot} draws four plots: P-P plot, 
          SP plot, Q-Q plot, and EP plot. Following, a description is given for 
@@ -93,20 +93,24 @@ probPlot(times, cens = rep(1, length(times)),
          are returned. The parameter estimation is acomplished with the 
          \code{fitdistcens} function of the \pkg{fitdistrplus} package.
 }
-\value{
-A list containing the following components
- \item{\code{Distribution}}{Distribution under study.}
- \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
-                          of the distribution under study.}
-}
-\references{
-J. R. Michael. \emph{The Stabilized Probability Plot}. In: Biometrika 70 (1) (1983), 
-11-17.
 
-L.A. Waller and B.W. Turnbull. \emph{Probability Plotting with Censored Data}. In:
-American Statistician 46 (1) (1992), 5-12.
+\value{
+  If \code{prnt = TRUE}, a list containing the following components
+   \item{\code{Distribution}}{Distribution under study.}
+   \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
+                            of the distribution under study.}
 }
-\author{K. Langohr, M. Besalú, G. Gómez.}
+
+\references{
+  J. R. Michael. \emph{The Stabilized Probability Plot}. In: Biometrika 70 (1) (1983), 
+  11-17.
+
+  L.A. Waller and B.W. Turnbull. \emph{Probability Plotting with Censored Data}. In:
+  American Statistician 46 (1) (1992), 5-12.
+}
+
+\author{K. Langohr, M. Besalú, M. Francisco, G. Gómez.}
+
 \examples{
 # P-P, Q-Q, SP, and EP plots for complete data
 set.seed(123)
@@ -116,11 +120,12 @@ probPlot(x, distr = "lognormal")
 
 # P-P, Q-Q, SP, and EP plots for censored data using ggplot2
 library(survival)
-probPlot(aml$time, aml$status, ggplo = TRUE) 
+colonsamp <- colon[sample(nrow(colon), 100), ]
+probPlot(colonsamp$time, colonsamp$status, "weibull", ggp = TRUE) 
 
 # P-P, Q-Q and SP plots for censored data and lognormal distribution
 data(nba)
 probPlot(nba$survtime, nba$cens, "lognorm", plots = c("PP", "QQ", "SP"),
-         ggplo = TRUE, m = matrix(1:3, nr = 1))
+         ggp = TRUE, m = matrix(1:3, nr = 1))
 }
 
