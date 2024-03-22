@@ -1,9 +1,9 @@
-36d3e1c11116c92fb1ce990a8f23edbc *DESCRIPTION
+64c58d461250f84afcff631771f01a08 *DESCRIPTION
 76ad375711f41fdf69467c06f8a00b10 *NAMESPACE
 fc16a7aa33a6df1f3cd90375dbb2b567 *R/ADcens.R
 a09c0f43d3c6d963ffb563ce94f44181 *R/CvMcens.R
 0586e35dbfa640ae9b51d4bdf68830c0 *R/KScens.R
-335e3b64bfdfa83e8818db63fb8b4641 *R/chisqcens.R
+822d01899db99fac064e707070ce013d *R/chisqcens.R
 7e47a343afb5147ebb9b1758c9a195bd *R/cumhazPlot.R
 23b3abf7d87998ae78eefed36a183c35 *R/gofcens.R
 27ce8fb28c802b6ae71011848e8fcaf8 *R/kmPlot.R
@@ -11,7 +11,7 @@ a09c0f43d3c6d963ffb563ce94f44181 *R/CvMcens.R
 3639004f2f9e5b9cfb06022e18d06dfc *data/nba.rda
 75ceda6695e7d2114fe0b47d9a30753b *man/ADcens.Rd
 dda983c61d6abd035947e7b746f22880 *man/CvMcens.Rd
-e20591ac1963a54b004bacc9733fb5f3 *man/GofCens-package.Rd
+94f5644c171597294d07f0188420e901 *man/GofCens-package.Rd
 f7cc1c8f6ec8630e92b8e8a01b05b780 *man/KScens.Rd
 115ac84011b1bd92045086cf351197d5 *man/chisqcens.Rd
 1b9dee402439e597f6b8f87e8fc6c5e3 *man/cumhazPlot.Rd

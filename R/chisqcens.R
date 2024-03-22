@@ -56,12 +56,12 @@ chisqcens <-
         cb <- cb[!is.na(cb)]
       }
       Mred <- length(cb) - 1
-      cb[Mred + 1] <- cb[Mred + 1] + 1
-      cellsCut <- cut(dat$times[dat$cens == 1], cb, right = FALSE)
-      obsfreq <- as.vector(table(cellsCut))
-      expProb <- pexp(cb[1:Mred + 1], 1 / betahat) - pexp(cb[1:Mred], 1 / betahat)
+      Fhat <- c(seq(0, 1, 1 / M)[1:Mred], 1)
+      cb[Mred + 1] <- Inf
+      obsfreq <- n * diff(Fhat)
+      expProb <- diff(pexp(cb[1:(Mred + 1)], 1 / betahat))
       v <- (obsfreq - n * expProb) / sqrt(n * expProb)
-      tn <- as.vector(t(v) %*% v)
+      tn <- t(v) %*% v
     }
     expRnd <- function(dat, mle) {
       out <- dat
@@ -103,12 +103,13 @@ chisqcens <-
         cb <- cb[!is.na(cb)]
       }
       Mred <- length(cb) - 1
-      cb[Mred + 1] <- cb[Mred + 1] + 1
-      cellsCut <- cut(dat$times[dat$cens == 1], cb, right = FALSE)
-      obsfreq <- as.vector(table(cellsCut))
-      gumbProb <- pgumbel(cb[1:M + 1], muhat, betahat) - pgumbel(cb[1:M], muhat, betahat)
+      Fhat <- c(seq(0, 1, 1 / M)[1:Mred], 1)
+      cb[Mred + 1] <- Inf
+      obsfreq <- n * diff(Fhat)
+      gumbProb <- diff(pgumbel(cb[1:(M + 1)], muhat, betahat))
+      gumbProb[1] <- gumbProb[1] + pgumbel(cb[1], muhat, betahat)
       v <- (obsfreq - n * gumbProb) / sqrt(n * gumbProb)
-      tn <- as.vector(t(v) %*% v)
+      tn <- t(v) %*% v
     }
     gumbRnd <- function(dat, mle) {
       out <- dat
@@ -142,13 +143,12 @@ chisqcens <-
         cb <- cb[!is.na(cb)]
       }
       Mred <- length(cb) - 1
-      cb[Mred + 1] <- cb[Mred + 1] + 1
-      cellsCut <- cut(dat$times[dat$cens == 1], cb, right = FALSE)
-      obsfreq <- as.vector(table(cellsCut))
-      weiProb <-pweibull(cb[1:Mred + 1], alphahat, betahat) -
-                  pweibull(cb[1:Mred], alphahat, betahat)
+      Fhat <- c(seq(0, 1, 1 / M)[1:Mred], 1)
+      cb[Mred + 1] <- Inf
+      obsfreq <- n * diff(Fhat)
+      weiProb <- diff(pweibull(cb[1:(Mred + 1)], alphahat, betahat))
       v <- (obsfreq - n * weiProb) / sqrt(n * weiProb)
-      tn <- as.vector(t(v) %*% v)
+      tn <- t(v) %*% v
     }
     weiRnd <- function(dat, mle) {
       out <- dat
@@ -182,12 +182,13 @@ chisqcens <-
         cb <- cb[!is.na(cb)]
       }
       Mred <- length(cb) - 1
-      cb[Mred + 1] <- cb[Mred + 1] + 1
-      cellsCut <- cut(dat$times[dat$cens == 1], cb, right = FALSE)
-      obsfreq <- as.vector(table(cellsCut))
-      normProb <- pnorm(cb[1:Mred + 1], muhat, betahat) - pnorm(cb[1:Mred], muhat, betahat)
+      Fhat <- c(seq(0, 1, 1 / M)[1:Mred], 1)
+      cb[Mred + 1] <- Inf
+      obsfreq <- n * diff(Fhat)
+      normProb <- diff(pnorm(cb[1:(Mred + 1)], muhat, betahat))
+      normProb[1] <- normProb[1] + pnorm(cb[1], muhat, betahat)
       v <- (obsfreq - n * normProb) / sqrt(n * normProb)
-      tn <- as.vector(t(v) %*% v)
+      tn <- t(v) %*% v
     }
     normRnd <- function(dat, mle) {
       out <- dat
@@ -221,12 +222,12 @@ chisqcens <-
         cb <- cb[!is.na(cb)]
       }
       Mred <- length(cb) - 1
-      cb[Mred + 1] <- cb[Mred + 1] + 1
-      cellsCut <- cut(dat$times[dat$cens == 1], cb, right = FALSE)
-      obsfreq <- as.vector(table(cellsCut))
-      lnormProb <- plnorm(cb[1:Mred + 1], muhat, betahat) - plnorm(cb[1:Mred], muhat, betahat)
+      Fhat <- c(seq(0, 1, 1 / M)[1:Mred], 1)
+      cb[Mred + 1] <- Inf
+      obsfreq <- n * diff(Fhat)
+      lnormProb <- diff(plnorm(cb[1:(Mred + 1)], muhat, betahat))
       v <- (obsfreq - n * lnormProb) / sqrt(n * lnormProb)
-      tn <- as.vector(t(v) %*% v)
+      tn <- t(v) %*% v
     }
     lnormRnd <- function(dat, mle) {
       out <- dat
@@ -260,13 +261,13 @@ chisqcens <-
         cb <- cb[!is.na(cb)]
       }
       Mred <- length(cb) - 1
-      cb[Mred + 1] <- cb[Mred + 1] + 1
-      cellsCut <- cut(dat$times[dat$cens == 1], cb, right = FALSE)
-      obsfreq <- as.vector(table(cellsCut))
-      logiProb <- plogis(cb[1:Mred + 1], muhat, betahat) -
-                    plogis(cb[1:Mred], muhat, betahat)
+      Fhat <- c(seq(0, 1, 1 / M)[1:Mred], 1)
+      cb[Mred + 1] <- Inf
+      obsfreq <- n * diff(Fhat)
+      logiProb <- diff(plogis(cb[1:(Mred + 1)], muhat, betahat))
+      logiProb[1] <- logiProb[1] + plogis(cb[1], muhat, betahat)
       v <- (obsfreq - n * logiProb) / sqrt(n * logiProb)
-      tn <- as.vector(t(v) %*% v)
+      tn <- t(v) %*% v
       }
     logiRnd <- function(dat, mle) {
       out <- dat
@@ -300,13 +301,12 @@ chisqcens <-
         cb <- cb[!is.na(cb)]
       }
       Mred <- length(cb) - 1
-      cb[Mred + 1] <- cb[Mred + 1] + 1
-      cellsCut <- cut(dat$times[dat$cens == 1], cb, right = FALSE)
-      obsfreq <- as.vector(table(cellsCut))
-      llogiProb <- pllogis(cb[1:Mred + 1], alphahat, scale = betahat) -
-        pllogis(cb[1:Mred], alphahat, scale = betahat)
+      Fhat <- c(seq(0, 1, 1 / M)[1:Mred], 1)
+      cb[Mred + 1] <- Inf
+      obsfreq <- n * diff(Fhat)
+      llogiProb <- diff(pllogis(cb[1:(Mred + 1)], alphahat, scale = betahat))
       v <- (obsfreq - n * llogiProb) / sqrt(n * llogiProb)
-      tn <- as.vector(t(v) %*% v)
+      tn <- t(v) %*% v
     }
     llogiRnd <- function(dat, mle) {
       out <- dat
@@ -342,12 +342,13 @@ chisqcens <-
         cb <- cb[!is.na(cb)]
       }
       Mred <- length(cb) - 1
-      cb[Mred + 1] <- cb[Mred + 1] + 1
-      cellsCut <- cut(dat$times[dat$cens == 1], cb, right = FALSE)
-      obsfreq <- as.vector(table(cellsCut))
-      betaProb <- punif(cb[1:M + 1], alphahat, gammahat) - punif(cb[1:M], alphahat, gammahat)
+      Fhat <- c(seq(0, 1, 1 / M)[1:Mred], 1)
+      cb[Mred + 1] <- Inf
+      obsfreq <- n * diff(Fhat)
+      betaProb <- diff(pbeta(cb[1:(M + 1)] * (bBeta - aBeta) + aBeta, alphahat,
+                             gammahat))
       v <- (obsfreq - n * betaProb) / sqrt(n * betaProb)
-      tn <- as.vector(t(v) %*% v)
+      tn <- t(v) %*% v
     }
     betaRnd <- function(dat, mle) {
       out <- dat

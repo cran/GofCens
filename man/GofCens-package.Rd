@@ -41,8 +41,8 @@ The list of the parameters of the theoretical distribution can be set manually u
 \tabular{ll}{
     Package: \tab GofCens\cr
     Type: \tab Package\cr
-    Version: \tab 0.97\cr
-    Date: \tab 2024-03-13\cr
+    Version: \tab 0.98\cr
+    Date: \tab 2024-03-22\cr
     License: \tab GPL (>= 2)\cr}
 }
 \author{Klaus Langohr, Mireia Besalú, Matilde Francisco, Guadalupe Gómez
