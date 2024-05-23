@@ -25,8 +25,11 @@ cumhazPlot <-
     }
     if ("beta" %in% distributions && any(times < betaLimits[1] |
                                          times > betaLimits[2])) {
-      warning("Beta distributions is ignored because of out-of-bounds values.",
+      warning("Beta distributions is ignored because of out-of-bounds values.
+  Try with 'betaLimits = c(", pmax(0, min(times) - 1), ", ",
+                                        ceiling(max(times) + 1), ")'.",
               immediate. = TRUE)
+      cat("\n")
       distributions <- distributions[distributions != "beta"]
     }
     if (length(distributions) == 0) {
@@ -199,26 +202,26 @@ cumhazPlot <-
       grid.arrange(grobs = plolis, layout_matrix = m)
     }
     if (prnt) {
-      cat("Parameter Estimates\n")
+      cat("Parameter estimates\n")
       cat(" ", "\n")
       for (dist in distributions) {
         if (!is.null(params[[dist]])) {
-          cat(dist, ":\n", sep = "")
+          cat(dist, "\n", sep = "")
           if (dist %in% c("gumbel", "weibull", "normal", "logistic", "lognormal",
                           "loglogistic")) {
-            cat("   Scale:", round(params[[dist]][2], digits = degs), "\n")
             if ("location" %in% names(params[[dist]])) {
               cat("Location:", round(params[[dist]][1], digits = degs), "\n")
             }
             if ("shape" %in% names(params[[dist]])) {
               cat("   Shape:", round(params[[dist]][1], digits = degs), "\n")
             }
+            cat("   Scale:", round(params[[dist]][2], digits = degs), "\n")
           } else if(dist=="exponential"){
-            cat("Scale:", round(params[[dist]][1], digits = degs), "\n")
+            cat("   Scale:", round(params[[dist]][1], digits = degs), "\n")
           } else {
-            cat("  Shape1:", round(params[[dist]]$parameters[1], digits = degs), "\n")
-            cat("  Shape2:", round(params[[dist]]$parameters[2], digits = degs), "\n")
-            cat("  Domain:", round(params[[dist]]$domain[1], digits = degs), "-",
+            cat("   Shape1:", round(params[[dist]]$parameters[1], digits = degs), "\n")
+            cat("   Shape2:", round(params[[dist]]$parameters[2], digits = degs), "\n")
+            cat("   Domain:", round(params[[dist]]$domain[1], digits = degs), "-",
                 round(params[[dist]]$domain[2],degs), "\n")
           }
           cat("\n")

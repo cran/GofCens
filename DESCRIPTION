@@ -1,8 +1,8 @@
 Package: GofCens
 Type: Package
 Title: Goodness-of-Fit Methods for Complete and Right-Censored Data
-Version: 0.98
-Date: 2024-03-22
+Version: 1.0
+Date: 2024-05-23
 Authors@R: c(person("Klaus", "Langohr", role = c("aut", "cre"),
                     email = "klaus.langohr@upc.edu"),
             person("Mireia", "Besalú", role = "aut"),
@@ -21,14 +21,14 @@ Description: Graphical tools and goodness-of-fit tests for complete and right-ce
 License: GPL (>= 2)
 Encoding: UTF-8
 Depends: R (>= 3.5.0), actuar
-Imports: survival, fitdistrplus, survsim, grid, ggplot2, gridExtra,
-        survminer, boot
+Imports: survival, fitdistrplus, grid, ggplot2, gridExtra, survminer,
+        boot
 NeedsCompilation: no
-Packaged: 2024-03-22 17:25:35 UTC; klangohr
+Packaged: 2024-05-23 18:07:08 UTC; klangohr
 Author: Klaus Langohr [aut, cre],
   Mireia Besalú [aut],
   Matilde Francisco [aut],
   Guadalupe Gómez [aut]
 Maintainer: Klaus Langohr <klaus.langohr@upc.edu>
 Repository: CRAN
-Date/Publication: 2024-03-22 19:00:02 UTC
+Date/Publication: 2024-05-23 19:00:03 UTC

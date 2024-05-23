@@ -11,8 +11,8 @@ ADcens(times, cens = rep(1, length(times)),
        distr = c("exponential", "gumbel", "weibull", "normal",
                  "lognormal", "logistic", "loglogistic", "beta"),
        betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, BS = 999,
-       params = list(shape = NULL, shape2 = NULL,
-                     location = NULL, scale = NULL), 
+       params0 = list(shape = NULL, shape2 = NULL,
+                      location = NULL, scale = NULL), 
        prnt = TRUE, outp = "list", tol = 1e-04)
 }
 
@@ -34,21 +34,21 @@ ADcens(times, cens = rep(1, length(times)),
   \item{degs}{Integer indicating the number of decimal places of the numeric 
               results of the output.}
   \item{BS}{Number of bootstrap samples.}
-  \item{params}{List specifying the parameters of the theoretical distribution. 
-                By default, parameters are set to \code{NULL} and estimated with 
-                the maximum likelihood method. This argument is only considered, 
-                if all parameters of the studied distribution are specified.}
+  \item{params0}{List specifying the parameters of the theoretical distribution. 
+                 By default, parameters are set to \code{NULL} and estimated with 
+                 the maximum likelihood method. This argument is only considered, 
+                 if all parameters of the studied distribution are specified.}
   \item{outp}{Indicator of how the output will be displayed. The possible formats are \code{list} and \code{table}.}
   \item{prnt}{Logical to indicate if the estimations of the Anderson-Darling statistic and p-value should be printed. Default is \code{TRUE}.}
   \item{tol}{Precision of survival times.}
 }
 
 \details{
-         When dealing with complete data, we recommend to use the function 
-         \code{ad.test} of the \pkg{goftest} package. 
-         
          The parameter estimation is acomplished with the \code{fitdistcens} 
-         function of the \pkg{fitdistrplus} package.
+         function of the \pkg{fitdistrplus} package. 
+         
+         To avoid long computation times due to bootstrapping, an alternative 
+         with complete data is the function \code{ad.test} of the \pkg{goftest} package. 
          
          The precision of the survival times is important mainly in 
          the data generation step of the bootstrap samples.
@@ -57,6 +57,7 @@ ADcens(times, cens = rep(1, length(times)),
 \value{
 If \code{prnt = TRUE}, a list containing the following components:
   \item{\code{Distribution}}{Null distribution.}
+  \item{\code{Null hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
   \item{\code{AD}}{Value of Anderson-Darling statistic.}
   \item{\code{p-value}}{Estimated p-value.}
   \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 

@@ -11,8 +11,8 @@ KScens(times, cens = rep(1, length(times)),
        distr = c("exponential", "gumbel", "weibull", "normal", 
                  "lognormal", "logistic", "loglogistic", "beta"), 
        betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, 
-       params = list(shape = NULL, shape2 = NULL, location = NULL, 
-                     scale = NULL), outp = "list", prnt = TRUE)
+       params0 = list(shape = NULL, shape2 = NULL, location = NULL, 
+                      scale = NULL), prnt = TRUE, outp = "list")
 }
 
 \arguments{
@@ -32,13 +32,13 @@ KScens(times, cens = rep(1, length(times)),
                of the Gumbel distribution parameters.}
   \item{degs}{Integer indicating the number of decimal places of the numeric 
               results of the output.}
-  \item{params}{List specifying the parameters of the theoretical distribution. 
-                By default, parameters are set to \code{NULL} and estimated with 
-                the maximum likelihood method. This argument is only considered, 
-                if all parameters of the studied distribution are specified.}
-  \item{outp}{Indicator of how the output will be displayed. The possible formats are \code{list} and \code{table}.}
+  \item{params0}{List specifying the parameters of the theoretical distribution. 
+                 By default, parameters are set to \code{NULL} and estimated with 
+                 the maximum likelihood method. This argument is only considered, 
+                 if all parameters of the studied distribution are specified.}
   \item{prnt}{Logical to indicate if the estimations of the Kolmogorov-Smirnov statistic and 
               p-value should be printed. Default is \code{TRUE}.}
+  \item{outp}{Indicator of how the output will be displayed. The possible formats are \code{list} and \code{table}.}
 }
 
 \details{Fleming et al. (1980) proposed a modified Kolmogorov-Smirnov test to use 
@@ -51,7 +51,7 @@ KScens(times, cens = rep(1, length(times)),
          definitions of \eqn{\widehat{F}_n(t)}, with which other values of 
          the test statistic might be obtained.
          
-         When dealing with complete data, we recommend to use the function 
+         An alternative with complete data is the function 
          \code{\link[stats]{ks.test}} of the \pkg{stats} package. 
          
          The parameter estimation is acomplished with the \code{fitdistcens} 
@@ -60,8 +60,9 @@ KScens(times, cens = rep(1, length(times)),
 \value{
 If \code{prnt = TRUE}, a list containing the following components:
   \item{\code{Distribution}}{Null distribution.}
-  \item{\code{p-value}}{P-value.}
+  \item{\code{Null hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
   \item{\code{A}}{Value of the modified Kolmogorov-Smirnov statistic.}
+  \item{\code{p-value}}{P-value.}
   \item{\code{F(y_m)}}{Estimation of the image of the last recorded time.}
   \item{\code{y_m}}{Last recorded time.}
   \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
@@ -92,7 +93,7 @@ KScens(times = rweibull(1000, 12, scale = 4), distr = "weibull", outp = "table")
 
 # Censored data
 library(survival)
-colonsamp <- colon[sample(nrow(colon),100),]
+colonsamp <- colon[sample(nrow(colon), 100), ]
 KScens(colonsamp$time, colonsamp$status, distr = "norm", outp = "list")
 
 data(nba)

@@ -7,15 +7,16 @@
 }
 
 \usage{
-probPlot(times, cens = rep(1, length(times)), 
-         distr = c("exponential", "gumbel", "weibull", "normal", 
-                   "lognormal", "logistic", "loglogistic", "beta"), 
-         plots = c("PP", "QQ", "SP", "ER"), 
-         colour = c("green4", "deepskyblue4", "yellow3", "mediumvioletred"), 
-         betaLimits = c(0, 1), igumb = c(10, 10), mtitle = TRUE, ggp = FALSE, 
-         m = NULL, prnt = TRUE, degs = 3, 
-         params = list(shape = NULL, shape2 = NULL, location = NULL, 
-                       scale = NULL), ...)
+probPlot(times, cens = rep(1, length(times)),
+         distr = c("exponential", "gumbel", "weibull", "normal",
+                   "lognormal", "logistic", "loglogistic", "beta"),
+         plots = c("PP", "QQ", "SP", "ER"),
+         colour = c("green4", "deepskyblue4", "yellow3",
+                    "mediumvioletred"), mtitle = TRUE, ggp = FALSE,
+         m = NULL, betaLimits = c(0, 1), igumb = c(10, 10),
+         degs = 3, prnt = TRUE,
+         params0 = list(shape = NULL, shape2 = NULL,
+                        location = NULL, scale = NULL), ...)
 }
 
 \arguments{
@@ -36,24 +37,24 @@ probPlot(times, cens = rep(1, length(times)),
   \item{colour}{Vector indicating the colours of the displayed plots. 
                 The vector will be recycled if its length is smaller 
                 than the number of plots to be displayed.}
-  \item{betaLimits}{Two-components vector with the lower and upper bounds of the 
-                    Beta distribution. This argument is only required, if the beta
-                    distribution is considered.}
-  \item{igumb}{Two-components vector with the initial values for the estimation 
-               of the Gumbel distribution parameters.}
   \item{mtitle}{Logical to add or not the title "Probability plots for a \code{distr}
                 distribution" to the plot. Default is \code{TRUE}.}
   \item{ggp}{Logical to use or not the \pkg{ggplot2} package to draw the plots. 
                Default is \code{FALSE}.}
   \item{m}{Optional layout for the plots to be displayed.}
-  \item{prnt}{Logical to indicate if the maximum likelihood estimates of the 
-              parameters should be printed. Default is \code{TRUE}.}
+  \item{betaLimits}{Two-components vector with the lower and upper bounds of the 
+                    Beta distribution. This argument is only required, if the beta
+                    distribution is considered.}
+  \item{igumb}{Two-components vector with the initial values for the estimation 
+               of the Gumbel distribution parameters.}
   \item{degs}{Integer indicating the number of decimal places of the numeric 
               results of the output.}
-  \item{params}{List specifying the parameters of the theoretical distribution. 
-                By default, parameters are set to \code{NULL} and estimated with 
-                the maximum likelihood method. This argument is only considered, 
-                if all parameters of the studied distribution are specified.}
+  \item{prnt}{Logical to indicate if the maximum likelihood estimates of the 
+              parameters should be printed. Default is \code{TRUE}.}
+  \item{params0}{List specifying the parameters of the theoretical distribution. 
+                 By default, parameters are set to \code{NULL} and estimated with 
+                 the maximum likelihood method. This argument is only considered, 
+                 if all parameters of the studied distribution are specified.}
   \item{\dots}{Optional arguments for function \code{par}, if \code{ggp = FALSE}.}
 }
 \details{By default, function \code{probPlot} draws four plots: P-P plot, 
@@ -95,10 +96,11 @@ probPlot(times, cens = rep(1, length(times)),
 }
 
 \value{
-  If \code{prnt = TRUE}, a list containing the following components
+  If \code{prnt = TRUE}, the following output is returned:
    \item{\code{Distribution}}{Distribution under study.}
-   \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
-                            of the distribution under study.}
+   \item{\code{Parameters}}{Parameters used to draw the plots (if \code{params0} 
+                            is provided).}
+   \item{\code{Estimates}}{Maximum likelihood estimates of the parameters.}
 }
 
 \references{

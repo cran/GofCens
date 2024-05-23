@@ -1,14 +1,13 @@
-probPlot <-
-function(times, cens = rep(1, length(times)),
+probPlot <- function(times, cens = rep(1, length(times)),
                      distr = c("exponential", "gumbel", "weibull", "normal",
                                "lognormal", "logistic", "loglogistic", "beta"),
                      plots = c("PP", "QQ", "SP", "ER"),
                      colour = c("green4", "deepskyblue4", "yellow3",
-                                "mediumvioletred"), betaLimits = c(0, 1),
-                     igumb = c(10, 10), mtitle = TRUE, ggp = FALSE, m = NULL,
-                     prnt = TRUE, degs = 3,
-                     params = list(shape = NULL, shape2 = NULL,
-                                   location = NULL, scale = NULL), ...) {
+                                "mediumvioletred"), mtitle = TRUE, ggp = FALSE,
+                     m = NULL, betaLimits = c(0, 1), igumb = c(10, 10),
+                     degs = 3, prnt = TRUE,
+                     params0 = list(shape = NULL, shape2 = NULL,
+                                    location = NULL, scale = NULL), ...) {
   if (!is.numeric(times)) {
     stop("Variable times must be numeric!")
   }
@@ -21,11 +20,30 @@ function(times, cens = rep(1, length(times)),
   if (!is.logical(ggp) || !is.logical(prnt)) {
     stop("ggp and prnt must be logicals!")
   }
+  if (!is.list(params0)) {
+    stop("params0 must be a list!")
+  }
   distr <- match.arg(distr)
   if (distr == "beta" && any(times < betaLimits[1] | times > betaLimits[2])) {
     msg <- paste0("Times must be within limits! Try with 'betaLimits = c(",
                   pmax(0, min(times) - 1), ", ", ceiling(max(times) + 1), ")'.")
     stop(msg)
+  }
+  if (!all(sapply(params0, is.null))) {
+    if (distr == "exponential" && is.null(params0$scale)) {
+      stop("Argument 'params0' requires a value for the scale parameter.")
+    }
+    if (distr %in% c("weibull", "loglogistic") &&
+        (is.null(params0$shape) || is.null(params0$scale))) {
+      stop("Argument 'params0' requires values for the shape and scale parameters.")
+    }
+    if (distr %in% c("gumbel", "normal", "lognormal", "logistic") &&
+        (is.null(params0$location) || is.null(params0$scale))) {
+      stop("Argument 'params0' requires values for the location and scale parameters.")
+    }
+    if (distr == "beta" && (is.null(params0$shape) || is.null(params0$shape2))) {
+      stop("Argument 'params0' requires values for both shape parameters.")
+    }
   }
   dd <- data.frame(left = as.vector(times), right = ifelse(cens == 1, times, NA))
   survKM <- survfit(Surv(times, cens) ~ 1)
@@ -35,128 +53,173 @@ function(times, cens = rep(1, length(times)),
   uPoint <- 1 - uPointSurv$surv
   empiricF <- rbind(c(0, tim, Inf), c(0, uPoint, 1))
   uEstim <- rep(0, length(uPoint))
+  alpha0 <- params0$shape
+  gamma0 <- params0$shape2
+  mu0 <- params0$location
+  beta0 <- params0$scale
+  alphaML <- gammaML <- muML <- betaML <- NULL
   if (distr == "exponential") {
-    if (is.null(params$scale)) {
-      muu <- unname(coefficients(survreg(Surv(times, cens) ~ 1,
-                                         dist = "exponential")))
+    muu <- unname(coefficients(survreg(Surv(times, cens) ~ 1,
+                                       dist = "exponential")))
+    betaML <- 1 / exp(-muu)
+    if (is.null(beta0)) {
       rateExp <- exp(-muu)
+      outp <- list(Distribution = "exponential", Estimates = betaML)
     } else {
-      rateExp <- 1 / params$scale
+      rateExp <- 1 / beta0
+      hypo <- c(scale = beta0)
+      outp <- list(Distribution = "exponential", Parameters = hypo,
+                   Estimates = betaML)
     }
     theorPP <- pexp(tim, rateExp)
     theorQQ <- qexp(1 - survTim, rateExp)
-    outp <- list(Distribution = "Exponential", Parameters = 1 / rateExp)
   }
   if (distr == "gumbel") {
-    if (is.null(params$location) || is.null(params$scale)) {
-      fitGum <- try(suppressMessages(fitdistcens(dd, "gumbel",
+    paramsML <- try(suppressMessages(fitdistcens(dd, "gumbel",
                                                  start = list(alpha = igumb[1],
                                                               scale = igumb[2]))),
                     silent = TRUE)
-      if (attr(fitGum, "class") == "try-error") {
-        stop("Function failed to estimate the parameters. Try with other initial values.")
-      }
-      locGum <- unname(fitGum$estimate[1])
-      scaleGum <- unname(fitGum$estimate[2])
+    if (attr(paramsML, "class") == "try-error") {
+      stop("Function failed to estimate the parameters.\n
+            Try with other initial values.")
+    }
+    muML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+    if (is.null(mu0) || is.null(beta0)) {
+      locGum <- muML
+      scaleGum <- betaML
+      outp <- list(Distribution = "Gumbel",
+                   Estimates = c(location = muML, scale = betaML))
     } else {
-      locGum <- params$location
-      scaleGum <- params$scale
+      locGum <- mu0
+      scaleGum <- beta0
+      hypo <- c(location = mu0, scale = beta0)
+      outp <- list(Distribution = "Gumbel", Parameters = hypo,
+                   Estimates = c(location = muML, scale = betaML))
     }
     theorPP <- pgumbel(tim, locGum, scaleGum)
     theorQQ <- qgumbel(1 - survTim, locGum, scaleGum)
-    outp <- list(Distribution = "Gumbel", Parameters = c(location = locGum,
-                                                         scale = scaleGum))
   }
   if (distr == "weibull") {
-    if (is.null(params$shape) || is.null(params$scale)) {
-      fitWei <- fitdistcens(dd, "weibull")
-      shapeWei <- unname(fitWei$estimate[1])
-      scaleWei <- unname(fitWei$estimate[2])
+    paramsML <- fitdistcens(dd, "weibull")
+    alphaML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+    if (is.null(alpha0) || is.null(beta0)) {
+      shapeWei <- alphaML
+      scaleWei <- betaML
+      outp <- list(Distribution = "Weibull",
+                   Estimates = c(shape = alphaML, scale = betaML))
     } else {
-      shapeWei <- params$shape
-      scaleWei <- params$scale
+      shapeWei <- alpha0
+      scaleWei <- beta0
+      hypo <- c(shape = alpha0, scale = beta0)
+      outp <- list(Distribution = "Weibull", Parameters = hypo,
+                   Estimates = c(shape = alphaML, scale = betaML))
     }
     theorPP <- pweibull(tim, shapeWei, scaleWei)
     theorQQ <- qweibull(1 - survTim, shapeWei, scaleWei)
-    outp <- list(Distribution = "Weibull", Parameters = c(shape = shapeWei,
-                                                          scale = scaleWei))
   }
   if (distr == "normal") {
-    if (is.null(params$location) || is.null(params$scale)) {
-      fitNorm <- fitdistcens(dd, "norm")
-      locNorm <- unname(fitNorm$estimate[1])
-      scaleNorm <- unname(fitNorm$estimate[2])
+    paramsML <- fitdistcens(dd, "norm")
+    muML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+    if (is.null(mu0) || is.null(beta0)) {
+      locNorm <- muML
+      scaleNorm <- betaML
+      outp <- list(Distribution = "normal",
+                   Estimates = c(location = muML, scale = betaML))
     } else {
-      locNorm <- params$location
-      scaleNorm <- params$scale
+      locNorm <- mu0
+      scaleNorm <- beta0
+      hypo <- c(location = mu0, scale = beta0)
+      outp <- list(Distribution = "normal", Parameters = hypo,
+                   Estimates = c(location = muML, scale = betaML))
     }
     theorPP <- pnorm(tim, locNorm, scaleNorm)
     theorQQ <- qnorm(1 - survTim, locNorm, scaleNorm)
-    outp <- list(Distribution = "Normal", Parameters = c(location = locNorm,
-                                                         scale = scaleNorm))
   }
   if (distr == "lognormal") {
-    if (is.null(params$location) || is.null(params$scale)) {
-      fitLnorm <- fitdistcens(dd, "lnorm")
-      locLnorm <- unname(fitLnorm$estimate[1])
-      scaleLnorm <- unname(fitLnorm$estimate[2])
+    paramsML <- fitdistcens(dd, "lnorm")
+    muML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+    if (is.null(mu0) || is.null(beta0)) {
+      locLnorm <- muML
+      scaleLnorm <- betaML
+      outp <- list(Distribution = "log-normal",
+                   Estimates = c(location = muML, scale = betaML))
     } else {
-      locLnorm <- params$location
-      scaleLnorm <- params$scale
+      locLnorm <- mu0
+      scaleLnorm <- beta0
+      hypo <- c(location = mu0, scale = beta0)
+      outp <- list(Distribution = "log-normal", Parameters = hypo,
+                   Estimates = c(location = muML, scale = betaML))
     }
     theorPP <- plnorm(tim, locLnorm, scaleLnorm)
     theorQQ <- qlnorm(1 - survTim, locLnorm, scaleLnorm)
-    outp <- list(Distribution = "Log-normal", Parameters = c(location = locLnorm,
-                                                             scale = scaleLnorm))
   }
   if (distr == "logistic") {
-    if (is.null(params$location) || is.null(params$scale)) {
-      fitLogis <- fitdistcens(dd, "logis")
-      locLogis <- unname(fitLogis$estimate[1])
-      scaleLogis <- unname(fitLogis$estimate[2])
+    paramsML <- fitdistcens(dd, "logis")
+    muML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+    if (is.null(mu0) || is.null(beta0)) {
+      locLogis <- muML
+      scaleLogis <- betaML
+      outp <- list(Distribution = "logistic",
+                   Estimates = c(location = muML, scale = betaML))
     } else {
-      locLogis <- params$location
-      scaleLogis <- params$scale
+      locLogis <- mu0
+      scaleLogis <- beta0
+      hypo <- c(location = mu0, scale = beta0)
+      outp <- list(Distribution = "logistic", Parameters = hypo,
+                   Estimates = c(location = muML, scale = betaML))
     }
     theorPP <- plogis(tim, locLogis, scaleLogis)
     theorQQ <- qlogis(1 - survTim, locLogis, scaleLogis)
-    outp <- list(Distribution = "Logistic", Parameters = c(location = locLogis,
-                                                           scale = scaleLogis))
   }
   if (distr == "loglogistic") {
-    if (is.null(params$shape) || is.null(params$scale)) {
-      fitLoglog <- unname(survreg(Surv(times, cens) ~ 1,
-                                  dist = "loglogistic")$icoef)
-      shapeLoglog <- 1 / exp(fitLoglog[2])
-      scaleLoglog <- exp(fitLoglog[1])
+    paramsML <- unname(survreg(Surv(times, cens) ~ 1,
+                               dist = "loglogistic")$icoef)
+    alphaML <- 1 / exp(paramsML[2])
+    betaML <- exp(paramsML[1])
+    if (is.null(alpha0) || is.null(beta0)) {
+      shapeLoglog <- alphaML
+      scaleLoglog <- betaML
+      outp <- list(Distribution = "log-logistic",
+                   Estimates = c(shape = alphaML, scale = betaML))
     } else {
-      shapeLoglog <- params$shape
-      scaleLoglog <- params$scale
+      shapeLoglog <- alpha0
+      scaleLoglog <- beta0
+      hypo <- c(shape = alpha0, scale = beta0)
+      outp <- list(Distribution = "log-logistic", Parameters = hypo,
+                   Estimates = c(shape = alphaML, scale = betaML))
     }
     theorPP <- pllogis(tim, shapeLoglog, scale = scaleLoglog)
     theorQQ <- qllogis(1 - survTim, shapeLoglog, scale = scaleLoglog)
-    outp <- list(Distribution = "Log-logistic", Parameters = c(shape = shapeLoglog,
-                                                               scale = scaleLoglog))
   }
   if (distr == "beta") {
     aBeta <- betaLimits[1]
     bBeta <- betaLimits[2]
-    if (is.null(params$shape) || is.null(params$shape2)) {
-      fitBeta <- fitdistcens((dd - aBeta) / (bBeta - aBeta), "beta")
-      shape1Beta <- unname(fitBeta$estimate[1])
-      shape2Beta <- unname(fitBeta$estimate[2])
+    paramsML <- fitdistcens((dd - aBeta) / (bBeta - aBeta), "beta")
+    alphaML <- unname(paramsML$estimate[1])
+    gammaML <- unname(paramsML$estimate[2])
+    if (is.null(alpha0) || is.null(gamma0)) {
+      shape1Beta <- alphaML
+      shape2Beta <- gammaML
+      outp <- list(Distribution = "beta",
+                   Estimates = c(shape = alphaML, shape2 = gammaML),
+                   interval.domain = betaLimits)
     } else {
-      shape1Beta <- params$shape
-      shape2Beta <- params$shape2
+      shape1Beta <- alpha0
+      shape2Beta <- gamma0
+      hypo <- c(shape = alpha0, shape2 = gamma0)
+      outp <- list(Distribution = "beta", Parameters = hypo,
+                   Estimates = c(shape = alphaML, shape2 = gammaML),
+                   interval.domain = betaLimits)
     }
     theorPP <- pbeta((tim - aBeta)/(bBeta - aBeta), shape1Beta, shape2Beta)
     theorQQ <- qbeta((1 - survTim), shape1Beta, shape2Beta) * (bBeta - aBeta)
                + aBeta
-    outp <- list(Distribution = "Beta", Parameters = c(shape1 = shape1Beta,
-                                                       shape2 = shape2Beta),
-                 interval.domain = betaLimits)
-  }
-
+}
   index <- 0
   for (i in 1:length(uPoint)) {
     while (theorQQ[i] > empiricF[1, index + 1]) {
@@ -219,7 +282,7 @@ function(times, cens = rep(1, length(times)),
       abline(0, 1)
     }
     if (mtitle) {
-      title(paste("Probability plots for a", outp$Distribution, "distribution"),
+      title(paste("Probability plots for", outp$Distribution, "distribution"),
             outer = TRUE, cex.main = 1.5)
     }
   } else {
@@ -260,7 +323,7 @@ function(times, cens = rep(1, length(times)),
     plolis <- list(PP, QQ, SP, ER)[c("PP", "QQ", "SP", "ER") %in% plots]
     if (mtitle) {
       grid.arrange(grobs = plolis, layout_matrix = m,
-                   top = textGrob(paste("Probability plots for a",
+                   top = textGrob(paste("Probability plots for",
                                         outp$Distribution, "distribution"),
                    gp = gpar(fontsize = 15, font = 2)))
     } else {
@@ -268,29 +331,49 @@ function(times, cens = rep(1, length(times)),
     }
   }
   if (prnt) {
-    cat("Parameter Estimates\n")
+    cat("Distribution:", outp$Distribution, "\n")
     cat(" ", "\n")
-    for (dist in distr) {
-      if (!is.null(outp$Parameters)) {
-        cat(dist, ":\n", sep = "")
+    if (!all(sapply(params0, is.null))) {
+      cat("Parameters used in probability plots:\n")
+      for (dist in distr) {
         if (dist %in% c("gumbel", "weibull", "normal", "logistic", "lognormal",
                         "loglogistic")) {
           if ("location" %in% names(outp$Parameters)) {
-            cat("Location:", round(outp$Parameters[1], degs), "\n")
+            cat("Location:", outp$Parameters[1], "\n")
           }
-          cat("   Scale:", round(outp$Parameters[2], degs), "\n")
           if ("shape" %in% names(outp$Parameters)) {
-            cat("   Shape:", round(outp$Parameters[1], degs), "\n")
+            cat("   Shape:", outp$Parameters[1], "\n")
           }
+          cat("   Scale:", outp$Parameters[2], "\n")
         } else if (dist == "exponential") {
-          cat("Scale:",  round(outp$Parameters,degs), "\n")
+          cat("   Scale:",  outp$Parameters, "\n")
         } else {
-          cat("  Shape1:", round(outp$Parameters[1], degs), "\n")
-          cat("  Shape2:", round(outp$Parameters[2], degs), "\n")
-          cat("  Domain:", round(outp$interval.domain[1], degs), "-",
-                           round(outp$interval.domain[2], degs), "\n")
+          cat("  Shape1:", outp$Parameters[1], "\n")
+          cat("  Shape2:", outp$Parameters[2], "\n")
+          cat("  Domain:", outp$interval.domain[1], "-",
+                           outp$interval.domain[2], "\n")
         }
-        cat("\n")
+      }
+      cat(" ", "\n")
+    }
+    cat("Parameter estimates:\n")
+    for (dist in distr) {
+      if (dist %in% c("gumbel", "weibull", "normal", "logistic", "lognormal",
+                      "loglogistic")) {
+        if ("location" %in% names(outp$Estimates)) {
+          cat("Location:", round(outp$Estimates[1], degs), "\n")
+        }
+        if ("shape" %in% names(outp$Estimates)) {
+          cat("   Shape:", round(outp$Estimates[1], degs), "\n")
+        }
+        cat("   Scale:", round(outp$Estimates[2], degs), "\n")
+      } else if (dist == "exponential") {
+        cat("   Scale:",  round(outp$Estimates,degs), "\n")
+      } else {
+        cat("  Shape1:", round(outp$Estimates[1], degs), "\n")
+        cat("  Shape2:", round(outp$Estimates[2], degs), "\n")
+        cat("  Domain:", round(outp$interval.domain[1], degs), "-",
+                         round(outp$interval.domain[2], degs), "\n")
       }
     }
   }

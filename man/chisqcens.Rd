@@ -11,8 +11,8 @@ chisqcens(times, cens = rep(1, length(times)), M,
           distr = c("exponential", "gumbel", "weibull", "normal",
                     "lognormal", "logistic", "loglogistic", "beta"),
           betaLimits=c(0, 1), igumb = c(10, 10), degs = 3, BS = 999,
-          params = list(shape = NULL, shape2 = NULL,
-                        location = NULL, scale = NULL),
+          params0 = list(shape = NULL, shape2 = NULL,
+                         location = NULL, scale = NULL),
           prnt = TRUE, outp = "list", tol = 1e-04)
 }
 
@@ -35,10 +35,10 @@ chisqcens(times, cens = rep(1, length(times)), M,
   \item{degs}{Integer indicating the number of decimal places of the numeric 
               results of the output.}
   \item{BS}{Number of bootstrap samples.}
-  \item{params}{List specifying the parameters of the theoretical distribution. 
-                By default, parameters are set to \code{NULL} and estimated with 
-                the maximum likelihood method. This argument is only considered, 
-                if all parameters of the studied distribution are specified.}
+  \item{params0}{List specifying the parameters of the theoretical distribution. 
+                 By default, parameters are set to \code{NULL} and estimated with 
+                 the maximum likelihood method. This argument is only considered, 
+                 if all parameters of the studied distribution are specified.}
   \item{outp}{Indicator of how the output will be displayed. The possible formats are                        
               \code{list} and \code{table}.}
   \item{prnt}{Logical to indicate if the estimations of the Anderson-Darling statistic and 
@@ -64,7 +64,8 @@ chisqcens(times, cens = rep(1, length(times)), M,
 
 \value{
 If \code{prnt = TRUE}, a list containing the following components:
- \item{\code{Distribution }}{Null distribution.}
+ \item{\code{Distribution}}{Null distribution.}
+  \item{\code{Null hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
  \item{\code{Statistic}}{Value of the test statistic.}
  \item{\code{p-value}}{Estimated p-value.}
  \item{\code{Parameters }}{The values of the parameters of the null distribution. 

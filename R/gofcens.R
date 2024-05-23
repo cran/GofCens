@@ -1,158 +1,216 @@
-gofcens <-
-  function(times, cens = rep(1, length(times)),
-           distr = c("exponential", "gumbel", "weibull", "normal",
-                     "lognormal", "logistic", "loglogistic", "beta"),
-           betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, BS = 999,
-           params = list(shape = NULL, shape2 = NULL,
-                         location = NULL, scale = NULL), outp = "list") {
-    if (!is.numeric(times)) {
-      stop("Variable times must be numeric!")
+gofcens <- function(times, cens = rep(1, length(times)),
+                    distr = c("exponential", "gumbel", "weibull", "normal",
+                              "lognormal", "logistic", "loglogistic", "beta"),
+                    betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, BS = 999,
+                    params0 = list(shape = NULL, shape2 = NULL,
+                                   location = NULL, scale = NULL),
+                    outp = "list") {
+  if (!is.numeric(times)) {
+    stop("Variable times must be numeric!")
+  }
+  if (any(times <= 0)) {
+    stop("Times must be strictly positive!")
+  }
+  if (any(!cens %in% 0:1)) {
+    stop("Censoring status must be either 0 or 1!")
+  }
+  if (!outp %in% c("list", "table")) {
+    stop("Invalid value of outp. Use 'table' or 'list'.")
+  }
+  if (!is.list(params0)) {
+    stop("params0 must be a list!")
+  }
+  distr <- match.arg(distr)
+  if (distr == "beta" && any(times < betaLimits[1] | times > betaLimits[2])) {
+    msg <- paste0("Times must be within limits! Try with 'betaLimits = c(",
+                  pmax(0, min(times) - 1), ", ", ceiling(max(times) + 1), ")'.")
+    stop(msg)
+  }
+  if (!all(sapply(params0, is.null))) {
+    if (distr == "exponential" && is.null(params0$scale)) {
+      stop("Argument 'params0' requires a value for the scale parameter.")
     }
-    if (any(times <= 0)) {
-      stop("Times must be strictly positive!")
+    if (distr %in% c("weibull", "loglogistic") &&
+        (is.null(params0$shape) || is.null(params0$scale))) {
+      stop("Argument 'params0' requires values for the shape and scale parameters.")
     }
-    if (any(!cens %in% 0:1)) {
-      stop("Censoring status must be either 0 or 1!")
+    if (distr %in% c("gumbel", "normal", "lognormal", "logistic") &&
+        (is.null(params0$location) || is.null(params0$scale))) {
+      stop("Argument 'params0' requires values for the location and scale parameters.")
     }
-    if (!outp %in% c("list", "table")) {
-      stop("Invalid value of outp. Use 'table' or 'list'.")
+    if (distr == "beta" && (is.null(params0$shape) || is.null(params0$shape2))) {
+      stop("Argument 'params0' requires values for both shape parameters.")
     }
-    distr <- match.arg(distr)
-    if (distr == "beta" && any(times < betaLimits[1] | times > betaLimits[2])) {
-      msg <- paste0("Times must be within limits! Try with 'betaLimits = c(",
-                    pmax(0, min(times) - 1), ", ", ceiling(max(times) + 1), ")'.")
-      stop(msg)
+  }
+  dd <- data.frame(left = as.vector(times), right = ifelse(cens == 1, times, NA))
+  alpha0 <- params0$shape
+  gamma0 <- params0$shape2
+  mu0 <- params0$location
+  beta0 <- params0$scale
+  alphaML <- gammaML <- muML <- betaML <- NULL
+  if (distr == "exponential") {
+    if (!is.null(beta0)) {
+      hypo <- c(scale = beta0)
     }
-    dd <- data.frame(left = as.vector(times), right = ifelse(cens == 1, times, NA))
-    stimes <- sort(unique(times[cens == 1]))
-    alpha <- params$shape
-    gamma <- params$shape2
-    mu <- params$location
-    beta <- params$scale
-    if (distr == "exponential") {
-      if (is.null(beta)) {
-        muu <- unname(coefficients(survreg(Surv(times, cens) ~ 1,
-                                           dist = "exponential")))
-        beta <- 1 / exp(-muu)
-      }
-      y0 <- c(pexp(stimes, 1 / beta), 1)
+    muu <- unname(coefficients(survreg(Surv(times, cens) ~ 1,
+                                       dist = "exponential")))
+    betaML <- 1 / exp(-muu)
+  }
+  if (distr == "gumbel") {
+    if (!is.null(mu0) && !is.null(beta0)) {
+      hypo <- c(location = mu0, scale = beta0)
     }
-    if (distr == "gumbel") {
-      if (is.null(mu) || is.null(beta)) {
-        param <- try(suppressMessages(fitdistcens(dd, "gumbel",
-                                                  start = list(alpha = igumb[1],
-                                                               scale = igumb[2]))),
-                     silent = TRUE)
-        if (attr(param, "class") == "try-error") {
-          stop("Function failed to estimate the parameters.\n
-              Try with other initial values.")
-        }
-        mu <- unname(param$estimate[1])
-        beta <- unname(param$estimate[2])
-      }
-      y0 <- c(pgumbel(stimes, mu, beta), 1)
+    paramsML <- try(suppressMessages(fitdistcens(dd, "gumbel",
+                                                 start = list(alpha = igumb[1],
+                                                              scale = igumb[2]))),
+                    silent = TRUE)
+    if (attr(paramsML, "class") == "try-error") {
+      stop("Function failed to estimate the parameters.\n
+            Try with other initial values.")
     }
-    if (distr == "weibull") {
-      if (is.null(alpha) || is.null(beta)) {
-        param <- fitdistcens(dd, "weibull")
-        alpha <- unname(param$estimate[1])
-        beta <- unname(param$estimate[2])
-      }
-      y0 <- c(pweibull(stimes, alpha, beta), 1)
+    muML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+  }
+  if (distr == "weibull") {
+    if (!is.null(alpha0) && !is.null(beta0)) {
+      hypo <- c(shape = alpha0, scale = beta0)
     }
-    if (distr == "normal") {
-      if (is.null(mu) || is.null(beta)) {
-        param <- fitdistcens(dd, "norm")
-        mu <- unname(param$estimate[1])
-        beta <- unname(param$estimate[2])
-      }
-      y0 <- c(pnorm(stimes, mu, beta), 1)
+    paramsML <- fitdistcens(dd, "weibull")
+    alphaML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+  }
+  if (distr == "normal") {
+    if (!is.null(mu0) && !is.null(beta0)) {
+      hypo <- c(location = mu0, scale = beta0)
     }
-    if (distr == "lognormal") {
-      if (is.null(mu) || is.null(beta)) {
-        param <- fitdistcens(dd, "lnorm")
-        mu <- unname(param$estimate[1])
-        beta <- unname(param$estimate[2])
-      }
-      y0 <- c(plnorm(stimes, mu, beta), 1)
+    paramsML <- fitdistcens(dd, "norm")
+    muML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+  }
+  if (distr == "lognormal") {
+    if (!is.null(mu0) && !is.null(beta0)) {
+      hypo <- c(location = mu0, scale = beta0)
     }
-    if (distr == "logistic") {
-      if (is.null(mu) || is.null(beta)) {
-        param <- fitdistcens(dd, "logis")
-        mu <- unname(param$estimate[1])
-        beta <- unname(param$estimate[2])
-      }
-      y0 <- c(plogis(stimes, mu, beta), 1)
+    paramsML <- fitdistcens(dd, "lnorm")
+    muML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+  }
+  if (distr == "logistic") {
+    if (!is.null(mu0) && !is.null(beta0)) {
+      hypo <- c(location = mu0, scale = beta0)
     }
-    if (distr == "loglogistic") {
-      if (is.null(alpha) || is.null(beta)) {
-        param <- unname(survreg(Surv(times, cens) ~ 1,
-                                dist = "loglogistic")$icoef)
-        alpha <- 1 / exp(param[2])
-        beta <- exp(param[1])
-      }
-      y0 <- c(pllogis(stimes, alpha, scale = beta), 1)
+    paramsML <- fitdistcens(dd, "logis")
+    muML <- unname(paramsML$estimate[1])
+    betaML <- unname(paramsML$estimate[2])
+  }
+  if (distr == "loglogistic") {
+    if (!is.null(alpha0) && !is.null(beta0)) {
+      hypo <- c(shape = alpha0, scale = beta0)
     }
-    if (distr == "beta") {
-      aBeta <- betaLimits[1]
-      bBeta <- betaLimits[2]
-      if (is.null(alpha) || is.null(gamma)) {
-        param <- fitdistcens((dd - aBeta) / (bBeta - aBeta), "beta")
-        alpha <- unname(param$estimate[1])
-        gamma <- unname(param$estimate[2])
-      }
-      y0 <- c(pbeta((stimes - aBeta) / (bBeta - aBeta), alpha, gamma), 1)
+    paramsML <- unname(survreg(Surv(times, cens) ~ 1,
+                               dist = "loglogistic")$icoef)
+    alphaML <- 1 / exp(paramsML[2])
+    betaML <- exp(paramsML[1])
+  }
+  if (distr == "beta") {
+    if (!is.null(alpha0) && !is.null(gamma0)) {
+      hypo <- c(shape = alpha0, shape2 = gamma0)
     }
-    KM <- summary(survfit(Surv(times, cens) ~ 1))$surv
-    nc <- length(KM)
-    Fn <- c(1 - KM, NA)
-    CvM <- nc * (sum(Fn[-(nc + 1)] * (y0[-1] - y0[-(nc + 1)]) *
-                       (Fn[-(nc + 1)] - (y0[-1] + y0[-(nc + 1)]))) + 1 / 3)
-    Fn <- Fn[-(nc + 1)]
-    y0 <- y0[-(nc + 1)]
-    AD <- nc * (-1 - log(y0[nc]) - log(1 - y0[nc])+
-                  sum(Fn[-nc]^2 *
-                        (-log(1 - y0[-1]) + log(y0[-1]) + log(1 - y0[-nc]) - log(y0[-nc]))) -
-                  2 * sum(Fn[-nc] * (-log(1 - y0[-1]) + log(1 - y0[-nc]))))
-    KS <- as.vector(KScens(times, cens, distr, betaLimits, prnt = FALSE)$Test[2])
-    KSp <- as.vector(KScens(times, cens, distr, betaLimits, prnt = FALSE)$Test[1])
-    CvMp <- as.vector(CvMcens(times, cens, distr, betaLimits, BS, prnt = FALSE)$Test[2])
-    ADp <- as.vector(ADcens(times, cens, distr, betaLimits, BS, prnt = FALSE)$Test[2])
-    output <- list(Test = round(c(KS = KS, CvM = CvM, AD = AD), degs),
+    aBeta <- betaLimits[1]
+    bBeta <- betaLimits[2]
+    paramsML <- fitdistcens((dd - aBeta) / (bBeta - aBeta), "beta")
+    alphaML <- unname(paramsML$estimate[1])
+    gammaML <- unname(paramsML$estimate[2])
+  }
+  KStest <- KScens(times, cens, distr, betaLimits, igumb, params0 = params0,
+                   prnt = FALSE)
+  KS <- as.vector(KStest$Test[1])
+  KSp <- as.vector(KStest$Test[2])
+  CvMtest <- CvMcens(times, cens, distr, betaLimits, igumb, BS = BS,
+                     params0 = params0, prnt = FALSE)
+  CvM <- as.vector(CvMtest$Test[1])
+  CvMp <- as.vector(CvMtest$Test[2])
+  ADtest <- ADcens(times, cens, distr, betaLimits, igumb, BS = BS,
+                   params0 = params0, prnt = FALSE)
+  AD <- as.vector(ADtest$Test[1])
+  ADp <- as.vector(ADtest$Test[2])
+  if (all(sapply(params0, is.null))) {
+    output <- list(Distribution = distr,
+                   Test = round(c(KS = KS, CvM = CvM, AD = AD), degs),
                    pval = round(c(KS = KSp, CvM = CvMp, AD = ADp), degs),
-                   Distribution = distr,
-                   Parameters = round(c(shape = alpha, shape2 = gamma,
-                                        location = mu, scale = beta), degs))
-    if (outp == "table") {
-      cat("Distribution: ", output$Distribution, "\n")
-      cat("\nTests Results:\n")
-      header <- c("Test", "Statistics value", "p-value")
-      max_col_width <- max(nchar(header), nchar(names(output$Test))) #maximum with required for the columns
-      cat(sprintf("%s | %s | %s\n", strrep("-", max_col_width), strrep("-", max_col_width), strrep("-", max_col_width)))
-      cat(sprintf("%-*s | %-*s | %-*s\n", max_col_width, header[1], max_col_width, header[2], max_col_width, header[3]))
-      cat(sprintf("%s | %s | %s\n", strrep("-", max_col_width), strrep("-", max_col_width), strrep("-", max_col_width)))
-      for (i in 1:length(output$Test)) {
-        cat(sprintf("%-*s | %-*s | %-*s\n", max_col_width, names(output$Test)[i], max_col_width, unname(output$Test)[i], max_col_width, unname(output$pval)[i]))
-      }
-      cat(sprintf("%s | %s | %s\n", strrep("-", max_col_width), strrep("-", max_col_width), strrep("-", max_col_width)))
-
+                   Estimates = round(c(shape = alphaML, shape2 = gammaML,
+                                       location = muML, scale = betaML), degs))
+  } else {
+    output <- list(Distribution = distr,
+                   Hypothesis = hypo,
+                   Test = round(c(KS = KS, CvM = CvM, AD = AD), degs),
+                   pval = round(c(KS = KSp, CvM = CvMp, AD = ADp), degs),
+                   Estimates = round(c(shape = alphaML, shape2 = gammaML,
+                                       location = muML, scale = betaML), degs))
+  }
+  if (outp == "table") {
+    cat("Distribution:", output$Distribution, "\n")
+    if (!all(sapply(params0, is.null))) {
+      cat("\nNull hypothesis:\n")
       header1 <- c("Parameter", "Value")
-      max_col_width1 <- max(nchar(header1), nchar(names(output$Parameters)))
-      cat(sprintf("%s | %s\n", strrep("-", max_col_width1), strrep("-", max_col_width1)))
-      cat(sprintf("%-*s | %-*s\n", max_col_width1, header1[1], max_col_width1, header1[2]))
-      cat(sprintf("%s | %s\n", strrep("-", max_col_width1), strrep("-", max_col_width1)))
-      for (i in 1:length(output$Parameters)) {
-        cat(sprintf("%-*s | %-*s\n", max_col_width1, names(output$Parameters)[i], max_col_width1, unname(output$Parameters)[i]))
+      max_col_width1 <- max(nchar(header1), nchar(names(output$Hypothesis)))
+      cat(sprintf("%s | %s\n", strrep("-", max_col_width1),
+                  strrep("-", max_col_width1)))
+      cat(sprintf("%-*s | %-*s\n", max_col_width1, header1[1],
+                  max_col_width1, header1[2]))
+      cat(sprintf("%s | %s\n", strrep("-", max_col_width1),
+                  strrep("-", max_col_width1)))
+      for (i in 1:length(output$Hypothesis)) {
+        cat(sprintf("%-*s | %-*s\n", max_col_width1, names(output$Hypothesis)[i],
+                    max_col_width1, unname(output$Hypothesis)[i]))
       }
-      cat(sprintf("%s | %s\n", strrep("-", max_col_width1), strrep("-", max_col_width1)))
-    } else {
-      cat("\nDistribution: ", output$Distribution, "\n")
-      cat("\nTest statistics\n")
-      print(output$Test)
-      cat("\np-values\n")
-      print(output$pval)
-      cat("\nDistribution Parameters:\n")
-      print(output$Parameters)
+      cat(sprintf("%s | %s\n", strrep("-", max_col_width1),
+                  strrep("-", max_col_width1)))
     }
+    cat("\nTests results:\n")
+    header <- c("Test", "Statistics value", "p-value")
+    max_col_width <- max(nchar(header), nchar(names(output$Test)))
+    cat(sprintf("%s | %s | %s\n", strrep("-", max_col_width),
+                strrep("-", max_col_width), strrep("-", max_col_width)))
+    cat(sprintf("%-*s | %-*s | %-*s\n", max_col_width, header[1],
+                max_col_width, header[2], max_col_width, header[3]))
+    cat(sprintf("%s | %s | %s\n", strrep("-", max_col_width),
+                strrep("-", max_col_width), strrep("-", max_col_width)))
+    for (i in 1:length(output$Test)) {
+      cat(sprintf("%-*s | %-*s | %-*s\n", max_col_width,
+                  names(output$Test)[i], max_col_width, unname(output$Test)[i],
+                  max_col_width, unname(output$pval)[i]))
+    }
+    cat(sprintf("%s | %s | %s\n", strrep("-", max_col_width),
+                strrep("-", max_col_width), strrep("-", max_col_width)))
+
+    cat("\nParameter estimates:\n")
+    header1 <- c("Parameter", "Value")
+    max_col_width1 <- max(nchar(header1), nchar(names(output$Estimates)))
+    cat(sprintf("%s | %s\n", strrep("-", max_col_width1),
+                strrep("-", max_col_width1)))
+    cat(sprintf("%-*s | %-*s\n", max_col_width1, header1[1], max_col_width1,
+                header1[2]))
+    cat(sprintf("%s | %s\n", strrep("-", max_col_width1),
+                strrep("-", max_col_width1)))
+    for (i in 1:length(output$Estimates)) {
+      cat(sprintf("%-*s | %-*s\n", max_col_width1, names(output$Estimates)[i],
+                  max_col_width1, unname(output$Estimates)[i]))
+    }
+    cat(sprintf("%s | %s\n", strrep("-", max_col_width1),
+                strrep("-", max_col_width1)))
+  } else {
+    cat("Distribution:", output$Distribution, "\n")
+    if (!all(sapply(params0, is.null))) {
+      cat("\nNull hypothesis:\n")
+      print(output$Hypothesis)
+    }
+    cat("\nTest statistics\n")
+    print(output$Test)
+    cat("\np-values\n")
+    print(output$pval)
+    cat("\nParameter estimates:\n")
+    print(output$Estimates)
+  }
   invisible(output)
 }

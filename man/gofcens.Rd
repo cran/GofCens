@@ -13,8 +13,8 @@ gofcens(times, cens = rep(1, length(times)),
         distr = c("exponential", "gumbel", "weibull", "normal", 
                   "lognormal", "logistic", "loglogistic", "beta"), 
         betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, BS = 999, 
-        params = list(shape = NULL, shape2 = NULL, location = NULL, 
-                      scale = NULL), outp = "list")
+        params0 = list(shape = NULL, shape2 = NULL, location = NULL, 
+                       scale = NULL), outp = "list")
 }
 
 \arguments{
@@ -35,10 +35,10 @@ gofcens(times, cens = rep(1, length(times)),
   \item{degs}{Integer indicating the number of decimal places of the numeric 
               results of the output.}
   \item{BS}{Number of bootstrap samples.}
-  \item{params}{List specifying the parameters of the theoretical distribution. 
-                By default, parameters are set to \code{NULL} and estimated with 
-                the maximum likelihood method. This argument is only considered, 
-                if all parameters of the studied distribution are specified.}
+  \item{params0}{List specifying the parameters of the theoretical distribution. 
+                 By default, parameters are set to \code{NULL} and estimated with 
+                 the maximum likelihood method. This argument is only considered, 
+                 if all parameters of the studied distribution are specified.}
   \item{outp}{Indicator of how the output will be displayed. The possible formats are \code{list} and \code{table}.}
 }
 
@@ -58,11 +58,13 @@ gofcens(times, cens = rep(1, length(times)),
 \value{
 A list containing the following components
  \item{\code{Distribution}}{Null distribution.}
+  \item{\code{Null hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
  \item{\code{Tests statistics}}{Values of the Kolmogovor-Smirnov, Cramér-von Mises,
        and Anderson-Darling test statistics.}
  \item{\code{p-value}}{P-values associated with each test.}
  \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
                           of the distribution under study.}
+The list is also returned invisibly.
 }
 
 \references{
