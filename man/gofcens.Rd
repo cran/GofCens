@@ -1,22 +1,23 @@
 \name{gofcens}
 \alias{gofcens}
+\alias{gofcens.default}
+\alias{gofcens.formula}
 \title{Kolmogorov-Smirnov, Cramér-von Mises, and Anderson-Darling statistics for 
        complete and right-censored data}
 \description{
-\code{gofcens} computes the Kolmogorov-Smirnov, Cramér-von Mises, and 
-Anderson-Darling statistics ans p-values for complete and right-censored data against 
-eight possible distributions.
+  Function \code{gofcens} computes the Kolmogorov-Smirnov, Cramér-von Mises, and 
+  Anderson-Darling statistics ans p-values for complete and right-censored data against 
+  eight possible distributions.
 }
-
 \usage{
-gofcens(times, cens = rep(1, length(times)), 
+\method{gofcens}{default}(times, cens = rep(1, length(times)), 
         distr = c("exponential", "gumbel", "weibull", "normal", 
                   "lognormal", "logistic", "loglogistic", "beta"), 
         betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, BS = 999, 
         params0 = list(shape = NULL, shape2 = NULL, location = NULL, 
-                       scale = NULL), outp = "list")
+                       scale = NULL), ...)
+\method{gofcens}{formula}(formula, data,...)
 }
-
 \arguments{
   \item{times}{Numeric vector of times until the event of interest.}
   \item{cens}{Status indicator (1, exact time; 0, right-censored time). If not 
@@ -39,9 +40,10 @@ gofcens(times, cens = rep(1, length(times)),
                  By default, parameters are set to \code{NULL} and estimated with 
                  the maximum likelihood method. This argument is only considered, 
                  if all parameters of the studied distribution are specified.}
-  \item{outp}{Indicator of how the output will be displayed. The possible formats are \code{list} and \code{table}.}
+  \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
+  \item{data}{Data frame for variables in \code{formula}.}
+  \item{\dots}{Additional arguments.}
 }
-
 \details{Fleming et al. (1980) proposed a modified Kolmogorov-Smirnov test to be 
          used with right-censored data. Koziol and Green (1976) proposed a Cramér-von 
          Mises statistic for randomly censored data. This function reproduces 
@@ -56,15 +58,16 @@ gofcens(times, cens = rep(1, length(times)),
 }
 
 \value{
-A list containing the following components
- \item{\code{Distribution}}{Null distribution.}
+\code{gofcens} returns an object of \link[base]{class} \code{"gofcens"}.
+
+An object of class \code{"gofcens"} is a list containing the following components:
+  \item{\code{Distribution}}{Null distribution.}
   \item{\code{Null hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
- \item{\code{Tests statistics}}{Values of the Kolmogovor-Smirnov, Cramér-von Mises,
-       and Anderson-Darling test statistics.}
- \item{\code{p-value}}{P-values associated with each test.}
- \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
-                          of the distribution under study.}
-The list is also returned invisibly.
+  \item{\code{Tests statistics}}{Values of the Kolmogovor-Smirnov, Cramér-von Mises,
+        and Anderson-Darling test statistics.}
+  \item{\code{p-value}}{P-values associated with each test.}
+  \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
+                           of the distribution under study.}
 }
 
 \references{
@@ -97,8 +100,9 @@ set.seed(123)
 gofcens(times = rweibull(100, 12, scale = 4), distr = "weibull", BS = 499)
 
 # Censored data
-library(survival)
-colonsamp <- colon[sample(nrow(colon), 100), ]
-gofcens(colonsamp$time, colonsamp$status, distr = "normal")
+data(colon)
+set.seed(123)
+colonsamp <- colon[sample(nrow(colon), 300), ]
+gofcens(Surv(time, status) ~ 1, colonsamp, distr = "normal")
 }
 }

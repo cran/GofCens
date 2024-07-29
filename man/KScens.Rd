@@ -1,18 +1,21 @@
 \name{KScens}
 \alias{KScens}
+\alias{KScens.default}
+\alias{KScens.formula}
 \title{Kolmogorov-Smirnov test for complete and right-censored data}
 \description{
-Function \code{KScens} computes the Kolmogorov-Smirnov statistic and p-value for complete 
-and right-censored data against eight possible distributions.
+  Function \code{KScens} computes the Kolmogorov-Smirnov statistic and p-value for complete 
+  and right-censored data against eight possible distributions.
 }
 
 \usage{
-KScens(times, cens = rep(1, length(times)), 
+\method{KScens}{default}(times, cens = rep(1, length(times)), 
        distr = c("exponential", "gumbel", "weibull", "normal", 
                  "lognormal", "logistic", "loglogistic", "beta"), 
        betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, 
        params0 = list(shape = NULL, shape2 = NULL, location = NULL, 
-                      scale = NULL), prnt = TRUE, outp = "list")
+                      scale = NULL), ...)
+\method{KScens}{formula}(formula, data, ...)                     
 }
 
 \arguments{
@@ -36,9 +39,9 @@ KScens(times, cens = rep(1, length(times)),
                  By default, parameters are set to \code{NULL} and estimated with 
                  the maximum likelihood method. This argument is only considered, 
                  if all parameters of the studied distribution are specified.}
-  \item{prnt}{Logical to indicate if the estimations of the Kolmogorov-Smirnov statistic and 
-              p-value should be printed. Default is \code{TRUE}.}
-  \item{outp}{Indicator of how the output will be displayed. The possible formats are \code{list} and \code{table}.}
+  \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
+  \item{data}{Data frame for variables in \code{formula}.}
+  \item{\dots}{Additional arguments.}
 }
 
 \details{Fleming et al. (1980) proposed a modified Kolmogorov-Smirnov test to use 
@@ -58,7 +61,9 @@ KScens(times, cens = rep(1, length(times)),
          function of the \pkg{fitdistrplus} package.}
 
 \value{
-If \code{prnt = TRUE}, a list containing the following components:
+\code{KScens} returns an object of \link[base]{class} \code{"KScens"}.
+
+An object of class \code{"KScens"} is a list containing the following components:
   \item{\code{Distribution}}{Null distribution.}
   \item{\code{Null hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
   \item{\code{A}}{Value of the modified Kolmogorov-Smirnov statistic.}
@@ -67,7 +72,6 @@ If \code{prnt = TRUE}, a list containing the following components:
   \item{\code{y_m}}{Last recorded time.}
   \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
                            of the distribution under study.}
-The list is also returned invisibly.
 }
 
 \references{
@@ -89,14 +93,12 @@ Technometrics 17 (4) (1975), 507-510.
 \examples{
 # Complete data
 set.seed(123)
-KScens(times = rweibull(1000, 12, scale = 4), distr = "weibull", outp = "table")
+KScens(times = rweibull(1000, 12, scale = 4), distr = "weibull")
 
 # Censored data
-library(survival)
-colonsamp <- colon[sample(nrow(colon), 100), ]
-KScens(colonsamp$time, colonsamp$status, distr = "norm", outp = "list")
+KScens(Surv(time, status) ~ 1, colon, distr = "norm")
 
 data(nba)
-KScens(nba$survtime, nba$cens, "logis", degs = 2)
-KScens(nba$survtime, nba$cens, "beta", betaLimits = c(0, 80))
+KScens(Surv(survtime, cens) ~ 1, nba, "logis", degs = 2)
+KScens(Surv(survtime, cens) ~ 1, nba, "beta", betaLimits = c(0, 80))
 }

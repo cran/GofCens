@@ -1,21 +1,22 @@
 \name{chisqcens}
 \alias{chisqcens}
+\alias{chisqcens.default}
+\alias{chisqcens.formula}
 \title{General chi-squared statistics for right-censored data.}
 \description{
   Function \code{chisqcens} computes the general chi-squared test statistic for 
   right-censored data introduced by Kim (1993) and the respective p-value 
-  using bootstrapping.}
-
+  using bootstrapping.
+}
 \usage{
-chisqcens(times, cens = rep(1, length(times)), M,
+\method{chisqcens}{default}(times, cens = rep(1, length(times)), M,
           distr = c("exponential", "gumbel", "weibull", "normal",
                     "lognormal", "logistic", "loglogistic", "beta"),
           betaLimits=c(0, 1), igumb = c(10, 10), degs = 3, BS = 999,
           params0 = list(shape = NULL, shape2 = NULL,
-                         location = NULL, scale = NULL),
-          prnt = TRUE, outp = "list", tol = 1e-04)
+                         location = NULL, scale = NULL), tol = 1e-04, ...)
+\method{chisqcens}{formula}(formula, data,...)
 }
-
 \arguments{
   \item{times}{Numeric vector of times until the event of interest.}
   \item{cens}{Status indicator (1, exact time; 0, right-censored time). If not 
@@ -39,13 +40,11 @@ chisqcens(times, cens = rep(1, length(times)), M,
                  By default, parameters are set to \code{NULL} and estimated with 
                  the maximum likelihood method. This argument is only considered, 
                  if all parameters of the studied distribution are specified.}
-  \item{outp}{Indicator of how the output will be displayed. The possible formats are                        
-              \code{list} and \code{table}.}
-  \item{prnt}{Logical to indicate if the estimations of the Anderson-Darling statistic and 
-              p-value should be printed. Default is \code{TRUE}.}
   \item{tol}{Precision of survival times.}
+  \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
+  \item{data}{Data frame for variables in \code{formula}.}
+  \item{\dots}{Additional arguments.}
 }
-
 \details{The function implements the test introduced by Kim (1993) and returns 
          the value of the test statistic. 
          
@@ -61,39 +60,39 @@ chisqcens(times, cens = rep(1, length(times)), M,
          The precision of the survival times is important mainly in 
          the data generation step of the bootstrap samples.
 }
-
 \value{
-If \code{prnt = TRUE}, a list containing the following components:
- \item{\code{Distribution}}{Null distribution.}
+\code{chisqcens} returns an object of \link[base]{class} \code{"chisqcens"}.
+
+An object of class \code{"chisqcens"} is a list containing the following components:
+  \item{\code{Distribution}}{Null distribution.}
   \item{\code{Null hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
- \item{\code{Statistic}}{Value of the test statistic.}
- \item{\code{p-value}}{Estimated p-value.}
- \item{\code{Parameters }}{The values of the parameters of the null distribution. 
-                           If the user has set the parameters manually, these will 
-                           be the returned parameters, otherwise the maximum 
-                           likelihood estimates are returned.}
- \item{\code{CellNumber}}{Vector with two values: the original cell number 
-                          introduced by the user and the final cell number used.}
-The list is also returned invisibly.
+  \item{\code{Statistic}}{Value of the test statistic.}
+  \item{\code{p-value}}{Estimated p-value.}
+  \item{\code{Parameters }}{The values of the parameters of the null distribution. 
+                            If the user has set the parameters manually, these will 
+                            be the returned parameters, otherwise the maximum 
+                            likelihood estimates are returned.}
+  \item{\code{CellNumber}}{Vector with two values: the original cell number 
+                           introduced by the user and the final cell number used.}
 }
 
 \references{
   J. H. Kim. \emph{Chi-Square Goodness-of-Fit Tests for Randomly Censored Data.} 
   In: The Annals of Statistics, 21 (3) (1993), 1621-1639.
 }
-
 \author{K. Langohr, M. Besalú, M. Francisco, G. Gómez.}
 
 \examples{
 # Complete data
 set.seed(123)
-chisqcens(time = rgumbel(100, 12, scale = 4), M = 8, distr = "gumbel",
+chisqcens(times = rgumbel(100, 12, scale = 4), M = 8, distr = "gumbel",
           BS = 99)
 
 \dontrun{
 # Censored data
-library(survival)
-colonsamp <- colon[sample(nrow(colon), 100), ]
-chisqcens(colonsamp$time, colonsamp$status, M = 6, distr = "normal")
+data(colon)
+set.seed(123)
+colonsamp <- colon[sample(nrow(colon), 300), ]
+chisqcens(Surv(time, status) ~ 1, colonsamp, M = 6, distr = "normal")
 }
 }

@@ -1,6 +1,9 @@
 \name{kmPlot}
 \alias{kmPlot}
-
+\alias{kmPlot.default}
+\alias{kmPlot.formula}
+\alias{kmPlot.probPlot}
+\alias{kmPlot.probPlot}
 \title{Plot of the Kaplen-Meier and parametric estimations}
 \description{
   Function \code{kmPlot} is a function that generates a plot that combines a 
@@ -10,9 +13,10 @@
 }
 
 \usage{
-kmPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1, 
+\method{kmPlot}{default}(times, cens = rep(1, length(times)), distr = "all6", colour = 1, 
        betaLimits = c(0, 1), igumb = c(10, 10), ggp = FALSE, m = NULL,
        prnt = TRUE, degs = 3, ...)
+\method{kmPlot}{formula}(formula, data, ...)                     
 }
 
 \arguments{
@@ -40,6 +44,8 @@ kmPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1,
     parameters should be printed. Default is \code{TRUE}.}
   \item{degs}{Integer indicating the number of decimal places of the numeric 
               results of the output.}
+  \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
+  \item{data}{Data frame for variables in \code{formula}.}
   \item{\dots}{Optional arguments for function \code{par}, if \code{ggp = FALSE}.}
 }
 
@@ -49,10 +55,11 @@ kmPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1,
 }
 
 \value{
-  If \code{prnt = TRUE}, a list containing the following components
+  If \code{prnt = TRUE}, the following output is returned:
   \item{\code{Distribution}}{Distribution under study.}
   \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
     of the distribution under study.}
+  In addition, a list with the same contents is returned invisibly.
 }
 
 \references{
@@ -63,19 +70,18 @@ kmPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1,
 \author{K. Langohr, M. Besalú, M. Francisco, G. Gómez.}
 
 \examples{
-  # Plots for complete data and default distributions
-  set.seed(123)
-  x <- rexp(1000, 0.1)
-  kmPlot(x)
+# Plots for complete data and default distributions
+set.seed(123)
+x <- rexp(1000, 0.1)
+kmPlot(x)
 
-  # Plots for censored data using ggplot2
-  library(survival)
-  colonsamp <- colon[sample(nrow(colon), 100), ]
-  kmPlot(colonsamp$time, colonsamp$status, distr= "lognormal", ggp = TRUE) 
+# Plots for censored data using ggplot2
+data(colon)
+kmPlot(Surv(time, status) ~ 1, colon, distr= "lognormal", ggp = TRUE) 
   
-  # Plots for censored data from three distributions
-  data(nba)
-  kmPlot(nba$survtime, nba$cens, distr = c("normal", "weibull", "lognormal"), 
-         prnt = FALSE)
+# Plots for censored data from three distributions
+data(nba)
+kmPlot(Surv(survtime, cens) ~ 1, nba, distr = c("normal", "weibull", "lognormal"), 
+       prnt = FALSE)
 }
 

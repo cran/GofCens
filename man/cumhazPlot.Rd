@@ -1,5 +1,10 @@
 \name{cumhazPlot}
 \alias{cumhazPlot}
+\alias{cumhazPlot.default}
+\alias{cumhazPlot.formula}
+\alias{cumhazPlot.probPlot}
+\alias{cumhazPlot.probPlot}
+
 \title{Cumulative hazard plots to check the goodness of fit of parametric models}
 \description{
   Function \code{cumhazPlot} uses the cumulative hazard plot to check if a certain distribution 
@@ -7,9 +12,10 @@
 }
 
 \usage{
-cumhazPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1, 
+\method{cumhazPlot}{default}(times, cens = rep(1, length(times)), distr = "all6", colour = 1, 
            betaLimits = c(0, 1), igumb = c(10, 10), ggp = FALSE, m = NULL, 
            prnt = TRUE, degs = 3, ...)
+\method{cumhazPlot}{formula}(formula, data, ...)                     
 }
 
 \arguments{
@@ -39,6 +45,8 @@ cumhazPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1,
               Default is \code{TRUE}.}
   \item{degs}{Integer indicating the number of decimal places of the numeric 
               results of the output.}
+  \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
+  \item{data}{Data frame for variables in \code{formula}.}
   \item{\dots}{Optional arguments for function \code{par}, if \code{ggplo = FALSE}.}
 }
 
@@ -54,9 +62,12 @@ cumhazPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1,
          The parameter estimation is acomplished with the \code{fitdistcens} 
          function of the \pkg{fitdistrplus} package.}
 
-\value{If \code{prnt = TRUE}:
+\value{
+  If \code{prnt = TRUE}, the following output is returned:
   \item{Parameter estimates}{A list with the maximum likelihood estimates of the 
-                             parameters of all distributions considered.}}
+                             parameters of all distributions considered.}
+  In addition, a list with the same contents is returned invisibly.
+}
 
 \author{K. Langohr, M. Besalú, M. Francisco, G. Gómez.}
 
@@ -65,8 +76,8 @@ cumhazPlot(times, cens = rep(1, length(times)), distr = "all6", colour = 1,
 set.seed(123)
 x <- rlogis(1000, 50, 5)
 cumhazPlot(x, lwd = 2)
-
+ 
 # Censored data comparing three distributions
 data(nba)
-cumhazPlot(nba$survtime, nba$cens, distr = c("expo", "normal", "gumbel"))
+cumhazPlot(Surv(survtime, cens) ~ 1, nba, distr = c("expo", "normal", "gumbel"))
 }

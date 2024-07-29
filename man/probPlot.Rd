@@ -1,22 +1,26 @@
 \name{probPlot}
 \alias{probPlot}
-
+\alias{probPlot.default}
+\alias{probPlot.formula}
+\alias{print.probPlot}
+\alias{plot.probPlot}
 \title{Probability plots to check the goodness of fit of parametric models}
 \description{
 \code{probPlot} provides four types of probability plots: P-P plot, Q-Q plot, Stabilised probability plot, and Empirically Rescaled plot to check if a certain distribution is an appropiate choice for the data.
 }
 
 \usage{
-probPlot(times, cens = rep(1, length(times)),
+\method{probPlot}{default}(times, cens = rep(1, length(times)),
          distr = c("exponential", "gumbel", "weibull", "normal",
                    "lognormal", "logistic", "loglogistic", "beta"),
          plots = c("PP", "QQ", "SP", "ER"),
          colour = c("green4", "deepskyblue4", "yellow3",
                     "mediumvioletred"), mtitle = TRUE, ggp = FALSE,
          m = NULL, betaLimits = c(0, 1), igumb = c(10, 10),
-         degs = 3, prnt = TRUE,
+         prnt = TRUE, degs = 3, 
          params0 = list(shape = NULL, shape2 = NULL,
                         location = NULL, scale = NULL), ...)
+\method{probPlot}{formula}(formula, data, ...)                     
 }
 
 \arguments{
@@ -47,14 +51,16 @@ probPlot(times, cens = rep(1, length(times)),
                     distribution is considered.}
   \item{igumb}{Two-components vector with the initial values for the estimation 
                of the Gumbel distribution parameters.}
-  \item{degs}{Integer indicating the number of decimal places of the numeric 
-              results of the output.}
   \item{prnt}{Logical to indicate if the maximum likelihood estimates of the 
               parameters should be printed. Default is \code{TRUE}.}
+  \item{degs}{Integer indicating the number of decimal places of the numeric 
+              results of the output.}
   \item{params0}{List specifying the parameters of the theoretical distribution. 
                  By default, parameters are set to \code{NULL} and estimated with 
                  the maximum likelihood method. This argument is only considered, 
                  if all parameters of the studied distribution are specified.}
+  \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
+  \item{data}{Data frame for variables in \code{formula}.}
   \item{\dots}{Optional arguments for function \code{par}, if \code{ggp = FALSE}.}
 }
 \details{By default, function \code{probPlot} draws four plots: P-P plot, 
@@ -101,6 +107,7 @@ probPlot(times, cens = rep(1, length(times)),
    \item{\code{Parameters}}{Parameters used to draw the plots (if \code{params0} 
                             is provided).}
    \item{\code{Estimates}}{Maximum likelihood estimates of the parameters.}
+  In addition, a list with the same contents is returned invisibly.
 }
 
 \references{
@@ -121,13 +128,12 @@ probPlot(x)
 probPlot(x, distr = "lognormal") 
 
 # P-P, Q-Q, SP, and EP plots for censored data using ggplot2
-library(survival)
-colonsamp <- colon[sample(nrow(colon), 100), ]
-probPlot(colonsamp$time, colonsamp$status, "weibull", ggp = TRUE) 
+data(colon)
+probPlot(Surv(time, status) ~ 1, colon, "weibull", ggp = TRUE) 
 
 # P-P, Q-Q and SP plots for censored data and lognormal distribution
 data(nba)
-probPlot(nba$survtime, nba$cens, "lognorm", plots = c("PP", "QQ", "SP"),
+probPlot(Surv(survtime, cens) ~ 1, nba, "lognorm", plots = c("PP", "QQ", "SP"),
          ggp = TRUE, m = matrix(1:3, nr = 1))
 }
 

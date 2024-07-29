@@ -24,6 +24,6 @@ mortality of national basketball association (NBA) players.} In: Data in Brief,
 }
 \examples{
 data(nba)
-cumhazPlot(nba$survtime, nba$cens)
+cumhazPlot(Surv(survtime, cens) ~ 1, nba)
 }
 \keyword{datasets}

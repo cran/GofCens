@@ -1,18 +1,20 @@
 \name{CvMcens}
 \alias{CvMcens}
+\alias{CvMcens.default}
+\alias{CvMcens.formula}
 \title{Cramér-von Mises test for complete and right-censored data}
 \description{
-\code{CvMcens} computes the Cramér-von Mises statistic and p-value for complete 
-and right-censored data against eight possible distributions.
+  Function \code{CvMcens} computes the Cramér-von Mises statistic and p-value for complete 
+  and right-censored data against eight possible distributions.
 }
 \usage{
-CvMcens(times, cens = rep(1, length(times)),
+\method{CvMcens}{default}(times, cens = rep(1, length(times)),
         distr = c("exponential", "gumbel", "weibull", "normal",
                   "lognormal", "logistic", "loglogistic", "beta"),
         betaLimits = c(0, 1), igumb = c(10, 10), degs = 3, BS = 999,
         params0 = list(shape = NULL, shape2 = NULL,
-                       location = NULL, scale = NULL),
-        prnt = TRUE, outp = "list", tol = 1e-04)
+                       location = NULL, scale = NULL), tol = 1e-04, ...)
+\method{CvMcens}{formula}(formula, data,...)
 }
 \arguments{
   \item{times}{Numeric vector of times until the event of interest.}
@@ -36,10 +38,10 @@ CvMcens(times, cens = rep(1, length(times)),
                  By default, parameters are set to \code{NULL} and estimated with 
                  the maximum likelihood method. This argument is only considered, 
                  if all parameters of the studied distribution are specified.}
-  \item{outp}{Indicator of how the output will be displayed. The possible formats are                        
-  \code{list} and \code{table}.}
-  \item{prnt}{Logical to indicate if the estimations of the Anderson-Darling statistic and p-value should be printed. Default is \code{TRUE}.}
   \item{tol}{Precision of survival times.}
+  \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
+  \item{data}{Data frame for variables in \code{formula}.}
+  \item{\dots}{Additional arguments.}
 }
 \details{
          Koziol and Green (1976) proposed a Cramér-von 
@@ -59,14 +61,15 @@ CvMcens(times, cens = rep(1, length(times)),
          the data generation step of the bootstrap samples.
 }
 \value{
-If \code{prnt = TRUE}, a list containing the following components:
+\code{CvMcens} returns an object of \link[base]{class} \code{"CvMcens"}.
+
+An object of class \code{"CvMcens"} is a list containing the following components:
   \item{\code{Distribution}}{Null distribution.}
   \item{\code{Null hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
-  \item{\code{CvM}}{Value of Cramér-von Mises statistic.}
+  \item{\code{CvM}}{Value of the Cramér-von Mises statistic.}
   \item{\code{p-value}}{Estimated p-value.}
   \item{\code{Parameters}}{List with the maximum likelihood estimates of the parameters 
                            of the distribution under study.}
-The list is also returned invisibly.
 }
 
 \references{
@@ -96,8 +99,9 @@ CvMcens(times = rweibull(100, 12, scale = 4), distr = "weibull",
 
 \dontrun{
 # Censored data
-library(survival)
-colonsamp <- colon[sample(nrow(colon), 100), ]
-CvMcens(colonsamp$time, colonsamp$status, distr = "normal")
+data(colon)
+set.seed(123)
+colonsamp <- colon[sample(nrow(colon), 300), ]
+CvMcens(Surv(time, status) ~ 1, colonsamp, distr = "normal")
 }
 }
