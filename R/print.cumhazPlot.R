@@ -8,21 +8,33 @@ print.cumhazPlot <- function(x, ...) {
         if (dist %in% c("gumbel", "weibull", "normal", "logistic", "lognormal",
                         "loglogistic")) {
           if ("location" %in% names(x$params[[dist]])) {
-            cat("Location:", round(x$params[[dist]][1], x$degs), "\n")
+            cat("Location (se): ", round(x$params[[dist]][1], x$degs), " " ,
+                "(", round(x$se[[dist]][1], x$degs), ")", "\n", sep = "")
           }
           if ("shape" %in% names(x$params[[dist]])) {
-            cat("   Shape:", round(x$params[[dist]][1], x$degs), "\n")
+            cat("   Shape (se): ", round(x$params[[dist]][1], x$degs), " " ,
+                "(",round(x$se[[dist]][1], x$degs), ")", "\n", sep = "")
           }
-          cat("   Scale:", round(x$params[[dist]][2], x$degs), "\n")
+          cat("   Scale (se): ", round(x$params[[dist]][2], x$degs), " " ,
+              "(", round(x$se[[dist]][2], x$degs), ")", "\n", sep = "")
         } else {
           if (dist == "exponential") {
-            cat("   Scale:", round(x$params[[dist]], x$degs), "\n")
+            cat("   Scale (se): ", round(x$params[[dist]], x$degs), " " ,
+                "(", round(x$se[[dist]], x$degs), ")", "\n", sep = "")
           } else {
-            cat("  Shape1:", round(x$params[[dist]]$parameters[1], x$degs), "\n")
-            cat("  Shape2:", round(x$params[[dist]]$parameters[2], x$degs), "\n")
+            cat("  Shape1 (se): ", round(x$params[[dist]]$parameters[1], x$degs), " " ,
+                "(", round(x$se[[dist]][1], x$degs), ")", "\n", sep = "")
+            cat("  Shape2 (se): ", round(x$params[[dist]]$parameters[2], x$degs), " " ,
+                "(", round(x$se[[dist]][2], x$degs), ")", "\n", sep = "")
             cat("  Domain:", round(x$params[[dist]]$domain[1], x$degs), "-",
                 round(x$params[[dist]]$domain[2],x$degs), "\n")
           }
+        }
+        if(x$print.AIC){
+          cat( "   AIC:", round(x$aic[[dist]], x$degs), "\n")
+        }
+        if(x$print.BIC){
+          cat( "   BIC:", round(x$bic[[dist]], x$degs), "\n")
         }
         cat("\n")
       }

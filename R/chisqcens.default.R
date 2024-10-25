@@ -1,7 +1,7 @@
 chisqcens.default <- function(times, cens = rep(1, length(times)), M,
                               distr = c("exponential", "gumbel", "weibull", "normal",
                                         "lognormal", "logistic", "loglogistic", "beta"),
-                              betaLimits=c(0, 1), igumb = c(10, 10), degs = 3,
+                              betaLimits=c(0, 1), igumb = c(10, 10),
                               BS = 999, params0 = list(shape = NULL, shape2 = NULL,
                                                        location = NULL, scale = NULL),
                               tol = 1e-04, ...) {
@@ -47,6 +47,8 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
   mu0 <- params0$location
   beta0 <- params0$scale
   alphaML <- gammaML <- muML <- betaML <- NULL
+  alphaSE <- gammaSE <- muSE <- betaSE <- NULL
+  aic <- bic <- NULL
   censKM <- survfit(Surv(times, 1 - cens) ~ 1)
   survKM <- survfit(Surv(times, cens) ~ 1)
   n <- length(times)
@@ -60,9 +62,12 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
     if (!is.null(beta0)) {
       hypo <- c(scale = beta0)
     }
-    muu <- unname(coefficients(survreg(Surv(times, cens) ~ 1,
-                                       dist = "exponential")))
+    paramsML <- survreg(Surv(times, cens) ~ 1, dist = "exponential")
+    muu <- unname(coefficients(paramsML))
     betaML <- 1 / exp(-muu)
+    betaSE <- sqrt(paramsML$var[1])*exp(muu)
+    aic <- 2 - 2*paramsML$loglik[1]
+    bic <- log(length(times)) - 2*paramsML$loglik[1]
     expStat <- function(dat) {
       if (is.null(beta0)) {
         muu <- unname(coefficients(survreg(Surv(dat$times, dat$cens) ~ 1,
@@ -108,12 +113,16 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
                                                  start = list(alpha = igumb[1],
                                                               scale = igumb[2]))),
                     silent = TRUE)
-    if (attr(paramsML, "class") == "try-error") {
+    if (is(paramsML, "try-error")) {
       stop("Function failed to estimate the parameters.\n
             Try with other initial values.")
     }
     muML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
+    muSE <- unname(paramsML$sd[1])
+    betaSE <- unname(paramsML$sd[2])
+    aic <- paramsML$aic
+    bic <- paramsML$bic
     gumbStat <- function(dat) {
       if (is.null(mu0) || is.null(beta0)) {
         dd <- data.frame(left = as.vector(dat$times),
@@ -169,6 +178,10 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
     paramsML <- fitdistcens(dd, "weibull")
     alphaML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
+    alphaSE <- unname(paramsML$sd[1])
+    betaSE <- unname(paramsML$sd[2])
+    aic <- paramsML$aic
+    bic <- paramsML$bic
     weiStat <- function(dat) {
       if (is.null(alpha0) || is.null(beta0)) {
         dd <- data.frame(left = as.vector(dat$times),
@@ -222,6 +235,10 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
     paramsML <- fitdistcens(dd, "norm")
     muML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
+    muSE <- unname(paramsML$sd[1])
+    betaSE <- unname(paramsML$sd[2])
+    aic <- paramsML$aic
+    bic <- paramsML$bic
     normStat <- function(dat) {
       if (is.null(mu0) || is.null(beta0)) {
         dd <- data.frame(left = as.vector(dat$times),
@@ -276,6 +293,10 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
     paramsML <- fitdistcens(dd, "lnorm")
     muML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
+    muSE <- unname(paramsML$sd[1])
+    betaSE <- unname(paramsML$sd[2])
+    aic <- paramsML$aic
+    bic <- paramsML$bic
     lnormStat <- function(dat) {
       if (is.null(mu0) || is.null(beta0)) {
         dd <- data.frame(left = as.vector(dat$times),
@@ -329,6 +350,10 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
     paramsML <- fitdistcens(dd, "logis")
     muML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
+    muSE <- unname(paramsML$sd[1])
+    betaSE <- unname(paramsML$sd[2])
+    aic <- paramsML$aic
+    bic <- paramsML$bic
     logiStat <- function(dat) {
       if (is.null(mu0) || is.null(beta0)) {
         dd <- data.frame(left = as.vector(dat$times),
@@ -380,10 +405,13 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
     if (!is.null(alpha0) && !is.null(beta0)) {
       hypo <- c(shape = alpha0, scale = beta0)
     }
-    paramsML <- unname(survreg(Surv(times, cens) ~ 1,
-                               dist = "loglogistic")$icoef)
-    alphaML <- 1 / exp(paramsML[2])
-    betaML <- exp(paramsML[1])
+    paramsML <- survreg(Surv(times, cens) ~ 1, dist = "loglogistic")
+    alphaML <- 1 / exp(unname(paramsML$icoef)[2])
+    betaML <- exp(unname(paramsML$icoef)[1])
+    alphaSE <- sqrt(paramsML$var[4])*exp(-unname(paramsML$icoef)[2])
+    betaSE <- sqrt(paramsML$var[1])*exp(unname(paramsML$icoef)[1])
+    aic <- 2*2 - 2*paramsML$loglik[1]
+    bic <- log(length(times))*2 - 2*paramsML$loglik[1]
     llogiStat <- function(dat) {
       if (is.null(alpha0) || is.null(beta0)) {
         paramsBSML <- unname(survreg(Surv(dat$times, dat$cens) ~ 1,
@@ -438,6 +466,10 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
     paramsML <- fitdistcens((dd - aBeta) / (bBeta - aBeta), "beta")
     alphaML <- unname(paramsML$estimate[1])
     gammaML <- unname(paramsML$estimate[2])
+    alphaSE <- unname(paramsML$sd[1])
+    gammaSE <- unname(paramsML$sd[2])
+    aic <- paramsML$aic
+    bic <- paramsML$bic
     betaStat <- function(dat) {
       if (is.null(alpha0) || is.null(gamma0)) {
         dd <- data.frame(left = as.vector(dat$times),
@@ -490,17 +522,25 @@ chisqcens.default <- function(times, cens = rep(1, length(times)), M,
   pval <- (sum(bts$t[, 1] > bts$t0[1]) + 1) / (bts$R + 1)
   if (all(sapply(params0, is.null))) {
     output <- list(Distribution = distr,
-                   Test = round(c("Statistic" = tn, "p-value" = pval), degs),
-                   Estimates = round(c(shape = alphaML, shape2 = gammaML,
-                                       location = muML, scale = betaML), degs),
-                   Cellnumbers = c("Original" = Morig, "Final" = Mout))
+                   Test = c("Statistic" = tn, "p-value" = pval),
+                   Estimates = c(shape = alphaML, shape2 = gammaML,
+                                       location = muML, scale = betaML),
+                   StdErrors = c(shapeSE = alphaSE, shape2SE = gammaSE,
+                                 locationSE = muSE, scaleSE = betaSE),
+                   Cellnumbers = c("Original" = Morig, "Final" = Mout),
+                   aic = aic, bic = bic,
+                   BS = BS)
   } else {
     output <- list(Distribution = distr,
                    Hypothesis = hypo,
-                   Test = round(c("Statistic" = tn, "p-value" = pval), degs),
-                   Estimates = round(c(shape = alphaML, shape2 = gammaML,
-                                       location = muML, scale = betaML), degs),
-                   Cellnumbers = c("Original" = Morig, "Final" = Mout))
+                   Test = c("Statistic" = tn, "p-value" = pval),
+                   Estimates = c(shape = alphaML, shape2 = gammaML,
+                                       location = muML, scale = betaML),
+                   StdErrors = c(shapeSE = alphaSE, shape2SE = gammaSE,
+                                 locationSE = muSE, scaleSE = betaSE),
+                   Cellnumbers = c("Original" = Morig, "Final" = Mout),
+                   aic = aic, bic = bic,
+                   BS = BS)
   }
   class(output) <- "chisqcens"
   output

@@ -30,20 +30,34 @@ print.probPlot <- function(x, ...) {
       if (dist %in% c("gumbel", "weibull", "normal", "logistic", "lognormal",
                       "loglogistic")) {
         if ("location" %in% names(x$outp$Estimates)) {
-          cat("Location:", round(x$outp$Estimates[1], x$degs), "\n")
+          cat("Location (se): ", round(x$outp$Estimates[1], x$degs), " ",
+              "(", round(x$outp$StdErrors[1], x$degs), ")", "\n", sep = "")
         }
         if ("shape" %in% names(x$outp$Estimates)) {
-          cat("   Shape:", round(x$outp$Estimates[1], x$degs), "\n")
+          cat("   Shape (se): ", round(x$outp$Estimates[1], x$degs), " ",
+              "(", round(x$outp$StdErrors[1], x$degs), ")", "\n", sep = "")
         }
-        cat("   Scale:", round(x$outp$Estimates[2], x$degs), "\n")
+        cat("   Scale (se): ", round(x$outp$Estimates[2], x$degs), " ",
+            "(", round(x$outp$StdErrors[2], x$degs), ")", "\n", sep = "")
       } else if (dist == "exponential") {
-        cat("   Scale:",  round(x$outp$Estimates,x$degs), "\n")
+        cat("   Scale (se): ",  round(x$outp$Estimates,x$degs), " ",
+            "(", round(x$outp$StdErrors, x$degs), ")", "\n", sep = "")
       } else {
-        cat("  Shape1:", round(x$outp$Estimates[1], x$degs), "\n")
-        cat("  Shape2:", round(x$outp$Estimates[2], x$degs), "\n")
+        cat("  Shape1 (se): ", round(x$outp$Estimates[1], x$degs), " ",
+            "(", round(x$outp$StdErrors[1], x$degs), ")", "\n", sep = "")
+        cat("  Shape2 (se): ", round(x$outp$Estimates[2], x$degs), " ",
+            "(", round(x$outp$StdErrors[2], x$degs), ")", "\n", sep = "")
         cat("  Domain:", round(x$outp$interval.domain[1], x$degs), "-",
             round(x$outp$interval.domain[2], x$degs), "\n")
       }
+      cat("\n")
+      if(x$print.AIC){
+        cat( "   AIC:", round(x$outp$aic, x$degs), "\n")
+      }
+      if(x$print.BIC){
+        cat( "   BIC:", round(x$outp$bic, x$degs), "\n")
+      }
+      cat("\n")
     }
   }
   invisible(list(Distribution = x$distr, Estimates = round(x$outp$Estimates,

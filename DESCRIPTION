@@ -1,12 +1,13 @@
 Package: GofCens
 Type: Package
 Title: Goodness-of-Fit Methods for Complete and Right-Censored Data
-Version: 1.1
-Date: 2024-07-29
+Version: 1.2
+Date: 2024-10-25
 Authors@R: c(person("Klaus", "Langohr", role = c("aut", "cre"),
                     email = "klaus.langohr@upc.edu"),
             person("Mireia", "Besalú", role = "aut"),
             person("Matilde", "Francisco", role = "aut"),
+            person("Arnau", "Garcia", role = "aut"),
             person("Guadalupe", "Gómez", role = "aut"))
 Description: Graphical tools and goodness-of-fit tests for complete and right-censored data:
              1. Kolmogorov-Smirnov, Cramér-von Mises, and Anderson-Darling tests,
@@ -21,13 +22,16 @@ Description: Graphical tools and goodness-of-fit tests for complete and right-ce
 License: GPL (>= 2)
 Encoding: UTF-8
 Depends: R (>= 3.5.0), survival, actuar
-Imports: fitdistrplus, grid, ggplot2, gridExtra, survminer, boot
+Imports: fitdistrplus, grid, ggplot2, gridExtra, boot, methods
 NeedsCompilation: no
-Packaged: 2024-07-29 08:05:28 UTC; klaus
+VignetteBuilder: knitr
+Suggests: knitr, rmarkdown
+Packaged: 2024-10-25 11:07:10 UTC; klangohr
 Author: Klaus Langohr [aut, cre],
   Mireia Besalú [aut],
   Matilde Francisco [aut],
+  Arnau Garcia [aut],
   Guadalupe Gómez [aut]
 Maintainer: Klaus Langohr <klaus.langohr@upc.edu>
 Repository: CRAN
-Date/Publication: 2024-07-29 08:40:02 UTC
+Date/Publication: 2024-10-25 11:50:02 UTC
