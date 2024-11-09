@@ -1,10 +1,7 @@
 \name{cumhazPlot}
 \alias{cumhazPlot}
-\alias{cumhazPlot.default}
 \alias{cumhazPlot.formula}
-\alias{cumhazPlot.probPlot}
-\alias{cumhazPlot.probPlot}
-
+\alias{cumhazPlot.default}
 \title{Cumulative hazard plots to check the goodness of fit of parametric models}
 \description{
   Function \code{cumhazPlot} uses the cumulative hazard plot to check if a certain distribution
@@ -14,7 +11,7 @@
 \usage{
 \method{cumhazPlot}{default}(times, cens = rep(1, length(times)), distr = "all6", colour = 1,
            betaLimits = c(0, 1), igumb = c(10, 10), ggp = FALSE, m = NULL,
-           prnt = TRUE, degs = 3, print.AIC = TRUE, print.BIC = TRUE,...)
+           prnt = TRUE, degs = 3, print.AIC = TRUE, print.BIC = TRUE, ...)
 \method{cumhazPlot}{formula}(formula, data, ...)
 }
 
@@ -72,7 +69,6 @@
   \item{\code{StdErrors}}{Vector containing the estimated standard errors.}
   \item{\code{aic}}{The Akaike information criterion.}
   \item{\code{bic}}{The so-called BIC or SBC (Schwarz Bayesian criterion).}
-  In addition, a list with the same contents is returned invisibly.
 }
 
 \author{K. Langohr, M. Besalú, M. Francisco, A. Garcia, G. Gómez.}

@@ -1,7 +1,7 @@
 \name{ADcens}
 \alias{ADcens}
-\alias{ADcens.default}
 \alias{ADcens.formula}
+\alias{ADcens.default}
 \title{Anderson-Darling test for complete and right-censored data}
 \description{
   Function \code{ADcens} computes the Anderson-Darling test statistic and p-value for complete
@@ -81,7 +81,7 @@ An object of class \code{"ADcens"} is a list containing the following components
 }
 
 \seealso{Function \code{ad.test} (Package \pkg{goftest}) for complete data and
-  function \link{gofcens} for statistics and p-value of th Kolmogorov-Smirnov,
+  function \link{gofcens} for statistics and p-value of the Kolmogorov-Smirnov,
   Cramér von-Mises and Anderson-Darling together for right-censored data.
 }
 
@@ -91,7 +91,7 @@ set.seed(123)
 ADcens(times = rweibull(100, 12, scale = 4), distr = "weibull",
        BS = 199)
 print(ADcens(times = rweibull(100, 12, scale = 4), distr = "exponential",
-       BS = 199), outp = "table", print.BIC = FALSE, print.infoBoot = TRUE)
+             BS = 199), outp = "table", print.BIC = FALSE, print.infoBoot = TRUE)
 
 \dontrun{
 # Censored data

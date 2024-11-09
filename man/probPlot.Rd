@@ -1,9 +1,7 @@
 \name{probPlot}
 \alias{probPlot}
-\alias{probPlot.default}
 \alias{probPlot.formula}
-\alias{print.probPlot}
-\alias{plot.probPlot}
+\alias{probPlot.default}
 \title{Probability plots to check the goodness of fit of parametric models}
 \description{
 \code{probPlot} provides four types of probability plots: P-P plot, Q-Q plot, Stabilised probability plot, and Empirically Rescaled plot to check if a certain distribution is an appropiate choice for the data.
@@ -114,7 +112,6 @@
   \item{\code{StdErrors}}{Vector containing the estimated standard errors.}
   \item{\code{aic}}{The Akaike information criterion.}
   \item{\code{bic}}{The so-called BIC or SBC (Schwarz Bayesian criterion).}
-  In addition, a list with the same contents is returned invisibly.
 }
 
 \references{

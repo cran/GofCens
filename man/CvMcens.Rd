@@ -1,7 +1,7 @@
 \name{CvMcens}
 \alias{CvMcens}
-\alias{CvMcens.default}
 \alias{CvMcens.formula}
+\alias{CvMcens.default}
 \title{Cramér-von Mises test for complete and right-censored data}
 \description{
   Function \code{CvMcens} computes the Cramér-von Mises statistic and p-value for complete
@@ -14,7 +14,7 @@
         betaLimits = c(0, 1), igumb = c(10, 10), BS = 999,
         params0 = list(shape = NULL, shape2 = NULL,
                        location = NULL, scale = NULL), tol = 1e-04, ...)
-\method{CvMcens}{formula}(formula, data,...)
+\method{CvMcens}{formula}(formula, data, ...)
 }
 \arguments{
   \item{times}{Numeric vector of times until the event of interest.}
@@ -99,7 +99,7 @@ set.seed(123)
 CvMcens(times = rweibull(100, 12, scale = 4), distr = "weibull",
         BS = 199)
 print(CvMcens(times = rweibull(100, 12, scale = 4), distr = "normal",
-        BS = 99), degs = 4, print.AIC = FALSE, print.BIC = FALSE)
+              BS = 99), degs = 4, print.AIC = FALSE, print.BIC = FALSE)
 
 \dontrun{
 # Censored data

@@ -1,11 +1,11 @@
 \name{KScens}
 \alias{KScens}
-\alias{KScens.default}
 \alias{KScens.formula}
+\alias{KScens.default}
 \title{Kolmogorov-Smirnov test for complete and right-censored data}
 \description{
   Function \code{KScens} computes the Kolmogorov-Smirnov statistic and p-value for complete
-  and right-censored data against eight possible distributions using either bootsrapping or
+  and right-censored data against eight possible distributions using either bootstrapping or
   a modified test.
 }
 
@@ -48,7 +48,7 @@
   \item{\dots}{Additional arguments.}
 }
 
-\details{By default the p-value is computed via bootstrapping methods.
+\details{By default, the p-value is computed via bootstrapping methods.
 
          The parameter estimation is acomplished with the \code{fitdistcens}
          function of the \pkg{fitdistrplus} package.
@@ -77,9 +77,8 @@
 An object of class \code{"KScens"} is a list containing the following components:
   \item{\code{Distribution}}{Null distribution.}
   \item{\code{Hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
-  \item{\code{Test}}{Vector containing the value of the modified Kolmogorov-Smirnov statistic (\code{A}), the
-  estimated p-value (\code{p-value}), the estimation of the image of the last recorded time (\code{F(y_m)}) and
-  the last recorded time (\code{y_m}).}
+  \item{\code{Test}}{Vector containing the value of the modified Kolmogorov-Smirnov statistic (\code{A}) and the
+  estimated p-value (\code{p-value}).}
   \item{\code{Estimates}}{Vector with the maximum likelihood estimates of the parameters
     of the distribution under study.}
   \item{\code{StdErrors}}{Vector containing the estimated standard errors.}
@@ -101,10 +100,6 @@ to arbitrarily right-censored data}. In: Biometrics 36 (1980), 607-625.
 }
 
 \examples{
-# Complete data with bootstrapping
-set.seed(123)
-KScens(times = rweibull(100, 12, scale = 4), distr = "weibull", BS = 99)
-
 # Censored data with bootstrapping
 KScens(Surv(time, status) ~ 1, colon, distr = "norm", BS = 99)
 

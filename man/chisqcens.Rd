@@ -1,7 +1,7 @@
 \name{chisqcens}
 \alias{chisqcens}
-\alias{chisqcens.default}
 \alias{chisqcens.formula}
+\alias{chisqcens.default}
 \title{General chi-squared statistics for right-censored data.}
 \description{
   Function \code{chisqcens} computes the general chi-squared test statistic for
@@ -15,7 +15,7 @@
           betaLimits=c(0, 1), igumb = c(10, 10), BS = 999,
           params0 = list(shape = NULL, shape2 = NULL,
                          location = NULL, scale = NULL), tol = 1e-04, ...)
-\method{chisqcens}{formula}(formula, data,...)
+\method{chisqcens}{formula}(formula, data, ...)
 }
 \arguments{
   \item{times}{Numeric vector of times until the event of interest.}
@@ -88,7 +88,7 @@ set.seed(123)
 chisqcens(times = rgumbel(100, 12, scale = 4), M = 8, distr = "gumbel",
           BS = 99)
 print(chisqcens(times = rlogis(100, 20, scale = 3), M = 8, distr = "loglogistic",
-          BS = 105), print.AIC = FALSE, print.infoBoot = TRUE)
+                BS = 105), print.AIC = FALSE, print.infoBoot = TRUE)
 
 \dontrun{
 # Censored data

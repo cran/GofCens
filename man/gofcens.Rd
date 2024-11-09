@@ -1,8 +1,8 @@
 \name{gofcens}
 \alias{gofcens}
-\alias{gofcens.default}
 \alias{gofcens.formula}
-\title{Kolmogorov-Smirnov, Cramér-von Mises, and Anderson-Darling statistics for
+\alias{gofcens.default}
+\title{Kolmogorov-Smirnov, Cramér-von Mises, and Anderson-Darling tests for
        complete and right-censored data}
 \description{
   Function \code{gofcens} computes the Kolmogorov-Smirnov, Cramér-von Mises, and
@@ -17,7 +17,7 @@
         params0 = list(shape = NULL, shape2 = NULL, location = NULL,
                        scale = NULL),
         tol = 1e-04, ...)
-\method{gofcens}{formula}(formula, data,...)
+\method{gofcens}{formula}(formula, data, ...)
 }
 \arguments{
   \item{times}{Numeric vector of times until the event of interest.}
@@ -97,7 +97,7 @@ for censored data.} In: Biometrika, 63 (2) (1976), 291-298.
 set.seed(123)
 gofcens(times = rweibull(100, 12, scale = 4), distr = "weibull", BS = 499)
 print(gofcens(times = rweibull(100, 12, scale = 4), distr = "exponential"),
-              outp = "table", print.infoBoot = TRUE)
+      outp = "table", print.infoBoot = TRUE)
 
 # Censored data
 data(colon)
