@@ -2,22 +2,28 @@
 \alias{GofCens-package}
 \alias{GofCens}
 \docType{package}
-\title{Goodness-of-Fit Methods for Complete and Right-Censored Data.}
-\description{This package provides both graphical tools and goodness-of-fit tests for analyzing complete and right-censored data. It includes:
+\title{Goodness-of-Fit Methods for Right-Censored Data.}
+\description{This package implements both graphical tools and goodness-of-fit
+  tests for right-censored data. All functions can handle complete as well as
+  right-censored data. It has implemented:
     \enumerate{
-      \item Kolmogorov-Smirnov, Cramér-von Mises, and Anderson-Darling tests,
-      which utilize the empirical distribution function for complete data and are extended to handle right-censored data.
+      \item Kolmogorov-Smirnov (\code{\link[GofCens]{KScens}}), Cramér-von Mises (\code{\link[GofCens]{CvMcens}}),
+      and Anderson-Darling (\code{\link[GofCens]{ADcens}}) tests, which use the empirical distribution
+      function for complete data and are extended for right-censored data.
 
-      \item Generalized chi-squared-type test, which is based on the squared
-      differences between observed and expected counts using random
+      \item Generalized chi-squared-type (\code{\link[GofCens]{chisqcens}}) test, which is based
+      on the squared differences between observed and expected counts using random
       cells with right-censored data.
 
-      \item Graphical tools, such as probability and cumulative hazard plots, to help guide decisions about the most appropriate parametric model for the data.
+      \item A series of graphical tools such as probability (\code{\link[GofCens]{probPlot}})
+      or cumulative hazard (\code{\link[GofCens]{cumhazPlot}}) plots to guide the decision about
+      the most suitable parametric model for the data.
     }
 }
 
 \details{
-  The \code{GofCens} package can be used to assess the goodness of fit for the following eight distributions. The list below displays the parameterizations of their survival functions.
+  All functions of the \pkg{GofCens} package can be used to check the goodness of fit of the following 8 distributions. The list shows the parametrizations of the
+  survival functions.
 
   \enumerate{
     \item Exponential Distribution [Exp\eqn{(\beta)}] \deqn{S(t)=e^{-\frac{t}{\beta}}}
@@ -30,16 +36,17 @@
     \item 4-Param. Beta Distribution [Beta(\eqn{\alpha, \gamma, a, b})] \deqn{S(t)=1 - \frac{B_{(\alpha, \gamma, a, b)}(t)}{B(\alpha, \gamma)}}
   }
 
-  The parameters of the theoretical distribution can be set manually using the \code{params0} argument in each function. 
-  In this case, the correspondences are as follows: \eqn{\alpha} represents the \code{shape}, \eqn{\gamma} the \code{shape2}, 
-  \eqn{\mu} the \code{location}, and \eqn{\beta} the \code{scale} parameter.
+  The list of the parameters of the theoretical distribution can be set manually using the argument \code{params} of each function. In that case, the correspondence is: \eqn{\alpha} is the \code{shape} value, \eqn{\gamma} is the \code{shape2} value, \eqn{\mu} is the \code{location} value and \eqn{\beta} is the \code{scale} value.
 
+  In addition, the functions \code{KScens}, \code{CvMcens}, \code{ADcens}, and \code{chisqcens} can be used with any other
+  distribution for which the corresponding density (\code{dname}), distribution (\code{pname}), and random generator
+  (\code{rname}) functions are defined.
 
   \tabular{ll}{
     Package: \tab GofCens\cr
     Type: \tab Package\cr
-    Version: \tab 1.2.1\cr
-    Date: \tab 2024-11-9\cr
+    Version: \tab 1.5\cr
+    Date: \tab 2025-05-29\cr
     License: \tab GPL (>= 2)\cr}
 }
 \author{Klaus Langohr, Mireia Besalú, Matilde Francisco, Arnau Garcia, Guadalupe Gómez

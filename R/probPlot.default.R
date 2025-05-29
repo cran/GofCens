@@ -4,7 +4,7 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
                              plots = c("PP", "QQ", "SP", "ER"),
                              colour = c("green4", "deepskyblue4", "yellow3", "mediumvioletred"),
                              mtitle = TRUE, ggp = FALSE, m = NULL, betaLimits = c(0, 1),
-                             igumb = c(10, 10), prnt = TRUE, degs = 3,
+                             igumb = c(10, 10), prnt = FALSE, degs = 3,
                              params0 = list(shape = NULL, shape2 = NULL,
                                             location = NULL, scale = NULL),
                              print.AIC = TRUE, print.BIC = TRUE,
@@ -46,6 +46,7 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
       stop("Argument 'params0' requires values for both shape parameters.")
     }
   }
+  bool_complete <- all(cens==1)
   dd <- data.frame(left = as.vector(times), right = ifelse(cens == 1, times, NA))
   survKM <- survfit(Surv(times, cens) ~ 1)
   tim <- summary(survKM)$time
@@ -61,13 +62,24 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
   alphaML <- gammaML <- muML <- betaML <- NULL
   alphaSE <- gammaSE <- muSE <- betaSE <- NULL
   aic <- bic <- NULL
+  theorPP <- NULL
+  theorQQ <- NULL
   if (distr == "exponential") {
-    paramsML <- survreg(Surv(times, cens) ~ 1, dist = "exponential")
-    muu <- unname(coefficients(paramsML))
-    betaML <- 1 / exp(-muu)
-    betaSE <- sqrt(paramsML$var[1])*exp(muu)
-    aic <- 2 - 2*paramsML$loglik[1]
-    bic <- log(length(times)) - 2*paramsML$loglik[1]
+    if (bool_complete) {
+      paramsML <- fitdist(dd$left, "exp")
+      muu <- unname(paramsML$estimate)
+      betaML <- 1 / muu
+      betaSE <- sqrt(paramsML$vcov[1])*(1/muu)^2
+      aic <- paramsML$aic
+      bic <- paramsML$bic
+    } else {
+      paramsML <- survreg(Surv(times, cens) ~ 1, dist = "exponential")
+      muu <- unname(coefficients(paramsML))
+      betaML <- 1 / exp(-muu)
+      betaSE <- sqrt(paramsML$var[1])*exp(muu)
+      aic <- 2 - 2*paramsML$loglik[1]
+      bic <- log(length(times)) - 2*paramsML$loglik[1]
+    }
     if (is.null(beta0)) {
       rateExp <- exp(-muu)
       outp <- list(Distribution = "exponential", Estimates = betaML,
@@ -78,17 +90,32 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
       outp <- list(Distribution = "exponential", Parameters = hypo,
                    Estimates = betaML, StdErrors = betaSE, aic = aic, bic = bic)
     }
-    theorPP <- pexp(tim, rateExp)
-    theorQQ <- qexp(1 - survTim, rateExp)
+    if ("PP" %in% plots || "SP" %in% plots) {
+      theorPP <- pexp(tim, rateExp)
+    }
+    if ("QQ" %in% plots || "ER" %in% plots) {
+      theorQQ <- qexp(1 - survTim, rateExp)
+    }
   }
   if (distr == "gumbel") {
-    paramsML <- try(suppressMessages(fitdistcens(dd, "gumbel",
-                                                 start = list(alpha = igumb[1],
-                                                              scale = igumb[2]))),
-                    silent = TRUE)
-    if (is(paramsML, "try-error")) {
-      stop("Function failed to estimate the parameters.\n
+    if (bool_complete) {
+      paramsML <- try(suppressMessages(fitdist(dd$left, "gumbel",
+                                               start = list(alpha = igumb[1],
+                                                            scale = igumb[2]))),
+                      silent = TRUE)
+      if (is(paramsML, "try-error")) {
+        stop("Function failed to estimate the parameters.\n
             Try with other initial values.")
+      }
+    } else {
+      paramsML <- try(suppressMessages(fitdistcens(dd, "gumbel",
+                                                   start = list(alpha = igumb[1],
+                                                                scale = igumb[2]))),
+                      silent = TRUE)
+      if (is(paramsML, "try-error")) {
+        stop("Function failed to estimate the parameters.\n
+            Try with other initial values.")
+      }
     }
     muML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
@@ -112,11 +139,19 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
                    StdErrors = c(locationSE = muSE, scaleSE = betaSE),
                    aic = aic, bic = bic)
     }
-    theorPP <- pgumbel(tim, locGum, scaleGum)
-    theorQQ <- qgumbel(1 - survTim, locGum, scaleGum)
+    if ("PP" %in% plots || "SP" %in% plots) {
+      theorPP <- pgumbel(tim, locGum, scaleGum)
+    }
+    if ("QQ" %in% plots || "ER" %in% plots) {
+      theorQQ <- qgumbel(1 - survTim, locGum, scaleGum)
+    }
   }
   if (distr == "weibull") {
-    paramsML <- fitdistcens(dd, "weibull")
+    if (bool_complete) {
+      paramsML <- fitdist(dd$left, "weibull")
+    } else {
+      paramsML <- fitdistcens(dd, "weibull")
+    }
     alphaML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
     alphaSE <- unname(paramsML$sd[1])
@@ -139,11 +174,19 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
                    StdErrors = c(shapeSE = alphaSE, scaleSE = betaSE),
                    aic = aic, bic = bic)
     }
-    theorPP <- pweibull(tim, shapeWei, scaleWei)
-    theorQQ <- qweibull(1 - survTim, shapeWei, scaleWei)
+    if ("PP" %in% plots || "SP" %in% plots) {
+      theorPP <- pweibull(tim, shapeWei, scaleWei)
+    }
+    if ("QQ" %in% plots || "ER" %in% plots) {
+      theorQQ <- qweibull(1 - survTim, shapeWei, scaleWei)
+    }
   }
   if (distr == "normal") {
-    paramsML <- fitdistcens(dd, "norm")
+    if (bool_complete) {
+      paramsML <- fitdist(dd$left, "norm")
+    } else {
+      paramsML <- fitdistcens(dd, "norm")
+    }
     muML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
     muSE <- unname(paramsML$sd[1])
@@ -166,11 +209,19 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
                    StdErrors = c(locationSE = muSE, scaleSE = betaSE),
                    aic = aic, bic = bic)
     }
-    theorPP <- pnorm(tim, locNorm, scaleNorm)
-    theorQQ <- qnorm(1 - survTim, locNorm, scaleNorm)
+    if ("PP" %in% plots || "SP" %in% plots) {
+      theorPP <- pnorm(tim, locNorm, scaleNorm)
+    }
+    if ("QQ" %in% plots || "ER" %in% plots) {
+      theorQQ <- qnorm(1 - survTim, locNorm, scaleNorm)
+    }
   }
   if (distr == "lognormal") {
-    paramsML <- fitdistcens(dd, "lnorm")
+    if (bool_complete) {
+      paramsML <- fitdist(dd$left, "lnorm")
+    } else {
+      paramsML <- fitdistcens(dd, "lnorm")
+    }
     muML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
     muSE <- unname(paramsML$sd[1])
@@ -193,11 +244,19 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
                    StdErrors = c(locationSE = muSE, scaleSE = betaSE),
                    aic = aic, bic = bic)
     }
-    theorPP <- plnorm(tim, locLnorm, scaleLnorm)
-    theorQQ <- qlnorm(1 - survTim, locLnorm, scaleLnorm)
+    if ("PP" %in% plots || "SP" %in% plots) {
+      theorPP <- plnorm(tim, locLnorm, scaleLnorm)
+    }
+    if ("QQ" %in% plots || "ER" %in% plots) {
+      theorQQ <- qlnorm(1 - survTim, locLnorm, scaleLnorm)
+    }
   }
   if (distr == "logistic") {
-    paramsML <- fitdistcens(dd, "logis")
+    if (bool_complete) {
+      paramsML <- fitdist(dd$left, "logis")
+    } else {
+      paramsML <- fitdistcens(dd, "logis")
+    }
     muML <- unname(paramsML$estimate[1])
     betaML <- unname(paramsML$estimate[2])
     muSE <- unname(paramsML$sd[1])
@@ -220,17 +279,31 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
                    StdErrors = c(locationSE = muSE, scaleSE = betaSE),
                    aic = aic, bic = bic)
     }
-    theorPP <- plogis(tim, locLogis, scaleLogis)
-    theorQQ <- qlogis(1 - survTim, locLogis, scaleLogis)
+    if ("PP" %in% plots || "SP" %in% plots) {
+      theorPP <- plogis(tim, locLogis, scaleLogis)
+    }
+    if ("QQ" %in% plots || "ER" %in% plots) {
+      theorQQ <- qlogis(1 - survTim, locLogis, scaleLogis)
+    }
   }
   if (distr == "loglogistic") {
-    paramsML <- survreg(Surv(times, cens) ~ 1, dist = "loglogistic")
-    alphaML <- 1 / exp(unname(paramsML$icoef)[2])
-    betaML <- exp(unname(paramsML$icoef)[1])
-    alphaSE <- sqrt(paramsML$var[4])*exp(-unname(paramsML$icoef)[2])
-    betaSE <- sqrt(paramsML$var[1])*exp(unname(paramsML$icoef)[1])
-    aic <- 2*2 - 2*paramsML$loglik[1]
-    bic <- log(length(times))*2 - 2*paramsML$loglik[1]
+    if (bool_complete) {
+      paramsML <- fitdist(dd$left, "llogis")
+      alphaML <- unname(coefficients(paramsML))[1]
+      betaML <- unname(coefficients(paramsML))[2]
+      alphaSE <- sqrt(paramsML$vcov[1,1])
+      betaSE <- sqrt(paramsML$vcov[2,2])
+      aic <- paramsML$aic
+      bic <- paramsML$bic
+    } else {
+      paramsML <- survreg(Surv(times, cens) ~ 1, dist = "loglogistic")
+      alphaML <- 1 / exp(unname(paramsML$icoef)[2])
+      betaML <- exp(unname(paramsML$icoef)[1])
+      alphaSE <- sqrt(paramsML$var[4])*exp(-unname(paramsML$icoef)[2])
+      betaSE <- sqrt(paramsML$var[1])*exp(unname(paramsML$icoef)[1])
+      aic <- 2*2 - 2*paramsML$loglik[1]
+      bic <- log(length(times))*2 - 2*paramsML$loglik[1]
+    }
     if (is.null(alpha0) || is.null(beta0)) {
       shapeLoglog <- alphaML
       scaleLoglog <- betaML
@@ -247,13 +320,21 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
                    StdErrors = c(shapeSE = alphaSE, scaleSE = betaSE),
                    aic = aic, bic = bic)
     }
-    theorPP <- pllogis(tim, shapeLoglog, scale = scaleLoglog)
-    theorQQ <- qllogis(1 - survTim, shapeLoglog, scale = scaleLoglog)
+    if ("PP" %in% plots || "SP" %in% plots) {
+      theorPP <- pllogis(tim, shapeLoglog, scale = scaleLoglog)
+    }
+    if ("QQ" %in% plots || "ER" %in% plots) {
+      theorQQ <- qllogis(1 - survTim, shapeLoglog, scale = scaleLoglog)
+    }
   }
   if (distr == "beta") {
     aBeta <- betaLimits[1]
     bBeta <- betaLimits[2]
-    paramsML <- fitdistcens((dd - aBeta) / (bBeta - aBeta), "beta")
+    if (bool_complete) {
+      paramsML <- fitdist((dd$left - aBeta) / (bBeta - aBeta), "beta")
+    } else {
+      paramsML <- fitdistcens((dd - aBeta) / (bBeta - aBeta), "beta")
+    }
     alphaML <- unname(paramsML$estimate[1])
     gammaML <- unname(paramsML$estimate[2])
     alphaSE <- unname(paramsML$sd[1])
@@ -278,9 +359,13 @@ probPlot.default <- function(times, cens = rep(1, length(times)),
                    interval.domain = betaLimits,
                    aic = aic, bic = bic)
     }
-    theorPP <- pbeta((tim - aBeta)/(bBeta - aBeta), shape1Beta, shape2Beta)
-    theorQQ <- qbeta((1 - survTim), shape1Beta, shape2Beta) * (bBeta - aBeta)
+    if ("PP" %in% plots || "SP" %in% plots) {
+      theorPP <- pbeta((tim - aBeta)/(bBeta - aBeta), shape1Beta, shape2Beta)
+    }
+    if ("QQ" %in% plots || "ER" %in% plots) {
+      theorQQ <- qbeta((1 - survTim), shape1Beta, shape2Beta) * (bBeta - aBeta)
                + aBeta
+    }
   }
   output <- list(times = times, cens = cens, distr = distr, plots = plots,
                  colour = colour, mtitle = mtitle, ggp = ggp, m = m,

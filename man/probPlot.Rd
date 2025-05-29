@@ -15,7 +15,7 @@
          colour = c("green4", "deepskyblue4", "yellow3",
                     "mediumvioletred"), mtitle = TRUE, ggp = FALSE,
          m = NULL, betaLimits = c(0, 1), igumb = c(10, 10),
-         prnt = TRUE, degs = 3,
+         prnt = FALSE, degs = 3,
          params0 = list(shape = NULL, shape2 = NULL,
                         location = NULL, scale = NULL), print.AIC = TRUE,
                         print.BIC = TRUE, ...)
@@ -112,14 +112,15 @@
   \item{\code{StdErrors}}{Vector containing the estimated standard errors.}
   \item{\code{aic}}{The Akaike information criterion.}
   \item{\code{bic}}{The so-called BIC or SBC (Schwarz Bayesian criterion).}
+  In addition, a list with the same contents is returned invisibly.
 }
 
 \references{
   J. R. Michael. \emph{The Stabilized Probability Plot}. In: Biometrika 70 (1) (1983),
-  11-17.
+  11-17. URL: https://doi.org/10.1093/biomet/70.1.11
 
   L.A. Waller and B.W. Turnbull. \emph{Probability Plotting with Censored Data}. In:
-  American Statistician 46 (1) (1992), 5-12.
+  American Statistician 46 (1) (1992), 5-12. URL: https://doi.org/10.1080/00031305.1992.10475837
 }
 
 \author{K. Langohr, M. Besalú, M. Francisco, A. Garcia, G. Gómez.}

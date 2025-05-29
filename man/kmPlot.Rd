@@ -4,17 +4,17 @@
 \alias{kmPlot.default}
 \title{Plot of the Kaplan-Meier and parametric estimations}
 \description{
-  The \code{kmPlot} function generates a plot that combines a Kaplan-Meier 
-  survival curve with a parametric survival curve in the same graph. 
-  This is useful for comparing non-parametric survival estimates to a 
-  fitted parametric survival model.
+  Function \code{kmPlot} is a function that generates a plot that combines a
+  Kaplan-Meier survival curve and a parametric survival curve in the same graph.
+  It is useful for comparing non-parametric survival estimates with the fitted
+  parametric survival model.
 }
 
 \usage{
 \method{kmPlot}{default}(times, cens = rep(1, length(times)), distr = "all6",
        colour = c("black", "blue", "cornflowerblue"),
        betaLimits = c(0, 1), igumb = c(10, 10), ggp = FALSE, m = NULL,
-       prnt = TRUE, degs = 3, print.AIC = TRUE, print.BIC = TRUE, ...)
+       prnt = FALSE, degs = 3, print.AIC = TRUE, print.BIC = TRUE, ...)
 \method{kmPlot}{formula}(formula, data, ...)
 }
 
@@ -29,7 +29,7 @@
     the logistic (\code{"logistic"}), the loglogistic (\code{"loglogistic"}),
     the exponential (\code{"exponential"})
     and the beta (\code{"beta"}) distribution. Default is \code{"all6"} and
-    includes the first 6 listed which are the most used distributions.}
+    includes the fisrt 6 listed which are the most used distributions.}
   \item{colour}{Vector with three components indicating the colours of the
     displayed plots. The first element is for the survival curve, the second
     for the Kaplan-Meier curve, and the last one for the confidence intervals.}
@@ -65,11 +65,13 @@
   \item{\code{StdErrors}}{Vector containing the estimated standard errors.}
   \item{\code{aic}}{The Akaike information criterion.}
   \item{\code{bic}}{The so-called BIC or SBC (Schwarz Bayesian criterion).}
+  In addition, a list with the same contents is returned invisibly.
 }
 
 \references{
   Peterson Jr, Arthur V. \emph{Expressing the Kaplan-Meier estimator as a function of empirical subsurvival functions}.
   In: Journal of the American Statistical Association 72.360a (1977): 854-858.
+  URL: https://doi.org/10.1080/01621459.1977.10479970
 }
 
 \author{K. Langohr, M. Besalú, M. Francisco, A. Garcia, G. Gómez.}

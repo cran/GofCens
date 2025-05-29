@@ -4,9 +4,10 @@
 \alias{KScens.default}
 \title{Kolmogorov-Smirnov test for complete and right-censored data}
 \description{
-  Function \code{KScens} computes the Kolmogorov-Smirnov statistic and p-value for complete
-  and right-censored data against eight possible distributions using either bootstrapping or
-  a modified test.
+  Function \code{KScens} computes the Kolmogorov-Smirnov statistic and p-value for
+  right-censored data against eight possible predefined or user-specified distributions
+  using either bootstrapping or a modified test. This function also accounts for
+  complete data.
 }
 
 \usage{
@@ -15,8 +16,8 @@
                  "lognormal", "logistic", "loglogistic", "beta"),
        betaLimits = c(0, 1), igumb = c(10, 10), BS = 999,
        params0 = list(shape = NULL, shape2 = NULL, location = NULL,
-                      scale = NULL),
-       tol = 1e-04, boot = TRUE, ...)
+                      scale = NULL, theta = NULL),
+       tol = 1e-04, boot = TRUE, start = NULL, ...)
 \method{KScens}{formula}(formula, data, ...)
 }
 
@@ -29,7 +30,10 @@
                the Weibull (\code{"weibull"}), the Gumbel (\code{"gumbel"}),
                the normal (\code{"normal"}), the lognormal (\code{"lognormal"}),
                the logistic (\code{"logistic"}), the loglogistic (\code{"loglogistic"}),
-               and the beta (\code{"beta"}) distribution.}
+               and the beta (\code{"beta"}) distribution. In addition, if the
+               character string used is \code{"name"}, every distribution for which the
+               corresponding density (\code{dname}), distribution (\code{pname}),
+               and random generator (\code{rname}) functions are defined, can be used.}
   \item{betaLimits}{Two-components vector with the lower and upper bounds of the
                     Beta distribution. This argument is only required, if the beta
                     distribution is considered.}
@@ -45,10 +49,16 @@
   \item{data}{Data frame for variables in \code{formula}.}
   \item{boot}{Logical to indicate if the p-value is computed using bootstrapping or using the
               the modified Kolmogorov-Smirnov test (see details). Default is \code{TRUE}.}
-  \item{\dots}{Additional arguments.}
+  \item{start}{A named list giving the initial values of parameters of the named
+               distribution or a function of data computing initial values and
+               returning a named list. This argument may be omitted (default)
+               for the eight prespecified distributions. See more details in
+               \link[fitdistrplus]{mledist}.}
+  \item{\dots}{Additional arguments for the \code{boot} function of the
+    \pkg{boot} package.}
 }
 
-\details{By default, the p-value is computed via bootstrapping methods.
+\details{By default the p-value is computed via bootstrapping methods.
 
          The parameter estimation is acomplished with the \code{fitdistcens}
          function of the \pkg{fitdistrplus} package.
@@ -77,8 +87,9 @@
 An object of class \code{"KScens"} is a list containing the following components:
   \item{\code{Distribution}}{Null distribution.}
   \item{\code{Hypothesis}}{Parameters under the null hypothesis (if \code{params0} is provided).}
-  \item{\code{Test}}{Vector containing the value of the modified Kolmogorov-Smirnov statistic (\code{A}) and the
-  estimated p-value (\code{p-value}).}
+  \item{\code{Test}}{Vector containing the value of the modified Kolmogorov-Smirnov statistic (\code{A}), the
+  estimated p-value (\code{p-value}), the estimation of the image of the last recorded time (\code{F(y_m)}) and
+  the last recorded time (\code{y_m}).}
   \item{\code{Estimates}}{Vector with the maximum likelihood estimates of the parameters
     of the distribution under study.}
   \item{\code{StdErrors}}{Vector containing the estimated standard errors.}
@@ -89,7 +100,7 @@ An object of class \code{"KScens"} is a list containing the following components
 
 \references{
 T. R. Fleming et al. \emph{Modified Kolmogorov-Smirnov test procedure with application
-to arbitrarily right-censored data}. In: Biometrics 36 (1980), 607-625.
+to arbitrarily right-censored data}. In: Biometrics 36 (1980), 607-625. URL: https://doi.org/10.2307/2556114
 }
 
 \author{K. Langohr, M. Besalú, M. Francisco, A. Garcia, G. Gómez.}
@@ -100,6 +111,10 @@ to arbitrarily right-censored data}. In: Biometrics 36 (1980), 607-625.
 }
 
 \examples{
+# Complete data with bootstrapping
+set.seed(123)
+KScens(times = rweibull(100, 12, scale = 4), distr = "weibull", BS = 99)
+
 # Censored data with bootstrapping
 KScens(Surv(time, status) ~ 1, colon, distr = "norm", BS = 99)
 
@@ -107,7 +122,7 @@ KScens(Surv(time, status) ~ 1, colon, distr = "norm", BS = 99)
 KScens(Surv(time, status) ~ 1, colon, distr = "norm", boot = FALSE)
 
 data(nba)
-print(KScens(Surv(survtime, cens) ~ 1, nba, "logis", boot = FALSE), degs = 2)
+summary(KScens(Surv(survtime, cens) ~ 1, nba, "logis", boot = FALSE), degs = 2)
 KScens(Surv(survtime, cens) ~ 1, nba, "beta", betaLimits = c(0, 80),
        boot = FALSE)
 }

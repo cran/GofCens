@@ -22,7 +22,7 @@ KScens(times, delta, distr = "lognormal")
 
 ## -----------------------------------------------------------------------------
 set.seed(123)
-print(KScens(times, delta, distr = "weibull"), outp = "table")
+summary(KScens(times, delta, distr = "weibull"), outp = "table")
 
 ## -----------------------------------------------------------------------------
 KScens(times, delta, distr = "lognormal", boot = FALSE)
@@ -37,7 +37,7 @@ CvMcens(times, delta, distr = "weibull")
 
 ## -----------------------------------------------------------------------------
 set.seed(123)
-print(ADcens(times, delta, distr = "lognormal", 
+summary(ADcens(times, delta, distr = "lognormal", 
              params0 = list(location = 2, scale = 1.5)), outp = "table")
 
 ## -----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ gofcens(times, delta, distr = "lognormal")
 
 ## -----------------------------------------------------------------------------
 set.seed(123)
-print(gofcens(times, delta, distr = "weibull"), outp = "table")
+summary(gofcens(times, delta, distr = "weibull"), outp = "table")
 
 ## -----------------------------------------------------------------------------
 set.seed(123)
@@ -54,7 +54,7 @@ chisqcens(times, delta, M = 8, distr = "lognormal")
 
 ## -----------------------------------------------------------------------------
 set.seed(123)
-print(chisqcens(times, delta, M = 8, distr = "weibull"), outp = "table")
+summary(chisqcens(times, delta, M = 8, distr = "weibull"), outp = "table")
 
 ## -----------------------------------------------------------------------------
 data("nba")

@@ -6,17 +6,18 @@
        complete and right-censored data}
 \description{
   Function \code{gofcens} computes the Kolmogorov-Smirnov, Cramér-von Mises, and
-  Anderson-Darling statistics ans p-values for complete and right-censored data against
-  eight possible distributions using bootstrapping.
+  Anderson-Darling statistics and p-values for right-censored data against eight
+  possible predefined or user-specified distributions using bootstrapping. This
+  function also accounts for complete data.
 }
 \usage{
 \method{gofcens}{default}(times, cens = rep(1, length(times)),
         distr = c("exponential", "gumbel", "weibull", "normal",
                   "lognormal", "logistic", "loglogistic", "beta"),
         betaLimits = c(0, 1), igumb = c(10, 10), BS = 999,
-        params0 = list(shape = NULL, shape2 = NULL, location = NULL,
-                       scale = NULL),
-        tol = 1e-04, ...)
+        params0 = list(shape = NULL, shape2 = NULL,
+                       location = NULL, scale = NULL, theta = NULL),
+        tol = 1e-04, start = NULL, ...)
 \method{gofcens}{formula}(formula, data, ...)
 }
 \arguments{
@@ -28,7 +29,10 @@
                the Weibull (\code{"weibull"}), the Gumbel (\code{"gumbel"}),
                the normal (\code{"normal"}), the lognormal (\code{"lognormal"}),
                the logistic (\code{"logistic"}), the loglogistic (\code{"loglogistic"}),
-               and the beta (\code{"beta"}) distribution.}
+               and the beta (\code{"beta"}) distribution. In addition, if the
+               character string used is \code{"name"}, every distribution for which the
+               corresponding density (\code{dname}), distribution (\code{pname}),
+               and random generator (\code{rname}) functions are defined, can be used.}
   \item{betaLimits}{Two-components vector with the lower and upper bounds of the
                     Beta distribution. This argument is only required, if the beta
                     distribution is considered.}
@@ -42,7 +46,13 @@
   \item{tol}{Precision of survival times.}
   \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
   \item{data}{Data frame for variables in \code{formula}.}
-  \item{\dots}{Additional arguments.}
+  \item{start}{A named list giving the initial values of parameters of the named
+               distribution or a function of data computing initial values and
+               returning a named list. This argument may be omitted (default)
+               for the eight prespecified distributions. See more details in
+               \link[fitdistrplus]{mledist}.}
+  \item{\dots}{Additional arguments for the \code{boot} function of the
+    \pkg{boot} package.}
 }
 \details{All p-values are calculated via bootstrapping methods. For the three
          hypothesis tests, the same data generated with the bootstrapping method are used.
@@ -73,10 +83,10 @@ An object of class \code{"gofcens"} is a list containing the following component
 
 \references{
 J. A. Koziol and S. B. Green. \emph{A Cramér-von Mises statistic for randomly
-censored data}. In: Biometrika, 63 (3) (1976), 465-474.
+censored data}. In: Biometrika, 63 (3) (1976), 465-474. URL: https://doi.org/10.1093/biomet/63.3.465
 
 A. N. Pettitt and M. A. Stephens. \emph{Modified Cramér-von Mises statistics
-for censored data.} In: Biometrika, 63 (2) (1976), 291-298.
+for censored data.} In: Biometrika, 63 (2) (1976), 291-298. URL: https://doi.org/10.1093/biomet/63.2.291
 }
 \author{K. Langohr, M. Besalú, M. Francisco, A. Garcia, G. Gómez.}
 
@@ -85,9 +95,9 @@ for censored data.} In: Biometrika, 63 (2) (1976), 291-298.
                    limit the number of random censored samples generated and
                    reduce the execution time.}
 
-\seealso{\link[stats]{ks.test} (Package \code{stats}), \code{cvm.test}
-         (Package \code{goftest}), and \code{ad.test}
-         (Package \code{goftest}) for complete data, and \link{KScens} for the
+\seealso{\link[stats]{ks.test} (Package \pkg{stats}), \code{cvm.test}
+         (Package \pkg{goftest}), and \code{ad.test}
+         (Package \pkg{goftest}) for complete data, and \link{KScens} for the
          Kolmogorov-Smirnov test for right-censored data, which returns the p-value.
 }
 
@@ -96,8 +106,8 @@ for censored data.} In: Biometrika, 63 (2) (1976), 291-298.
 # Complete data
 set.seed(123)
 gofcens(times = rweibull(100, 12, scale = 4), distr = "weibull", BS = 499)
-print(gofcens(times = rweibull(100, 12, scale = 4), distr = "exponential"),
-      outp = "table", print.infoBoot = TRUE)
+summary(gofcens(times = rweibull(100, 12, scale = 4), distr = "exponential"),
+        outp = "table", print.infoBoot = TRUE)
 
 # Censored data
 data(colon)

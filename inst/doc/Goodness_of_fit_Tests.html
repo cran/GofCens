@@ -12,7 +12,7 @@
 
 <meta name="author" content="Arnau Garcia" />
 
-<meta name="date" content="2024-11-09" />
+<meta name="date" content="2025-05-29" />
 
 <title>Goodness of fit Tests</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Goodness of fit Tests</h1>
 <h4 class="author">Arnau Garcia</h4>
-<h4 class="date">2024-11-09</h4>
+<h4 class="date">2025-05-29</h4>
 
 
 <div id="TOC">
@@ -349,7 +349,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 of fit tests for complete and right-censored data</a>
 <ul>
 <li><a href="#kolmogorov-smirnov-test" id="toc-kolmogorov-smirnov-test">Kolmogorov-Smirnov test</a></li>
-<li><a href="#cramér-von-mises-test" id="toc-cramér-von-mises-test">Cramér-von Mises test</a></li>
+<li><a href="#cram%C3%A9r-von-mises-test" id="toc-cramér-von-mises-test">Cramér-von Mises test</a></li>
 <li><a href="#anderson-darling" id="toc-anderson-darling">Anderson-Darling</a></li>
 <li><a href="#gofcens-function" id="toc-gofcens-function">Gofcens
 function</a></li>
@@ -407,28 +407,20 @@ p-value that can be computed either via the theoretical approximation or
 via bootstrap methods.</p>
 <p>We run the <code>KScens()</code> function to assess the goodness of
 fit of the log-normal and the Weibull distributions. The p-value
-obtained with the log-normal distribution is, as expected, quite large
-(<span class="math inline">\(0.578\)</span>), whereas the low p-value
-(<span class="math inline">\(0.041\)</span>) in the second example
-provides large evidence against the Weibull distribution.</p>
+obtained with the log-normal distribution is, as expected, quite large,
+whereas the low p-value in the second example provides large evidence
+against the Weibull distribution.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">KScens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;lognormal&quot;</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; Distribution: lognormal </span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; Null hypothesis: the data follows a lognormal distribution </span></span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; KS Test results:</span></span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;       A p-value </span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;   0.781   0.116 </span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; Parameter estimates (se):</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; location          scale             </span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 1.988 (0.058)     0.883 (0.045)     </span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; AIC: 1266.899 </span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; BIC: 1274.307</span></span></code></pre></div>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;   0.781   0.116</span></span></code></pre></div>
 <p>Note that in this second example, with apply the internal function
 <code>print.KScens()</code>, which allows us to change the default list
 output to a table format (<code>outp = &quot;table&quot;</code>).</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">KScens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;weibull&quot;</span>), <span class="at">outp =</span> <span class="st">&quot;table&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">KScens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;weibull&quot;</span>), <span class="at">outp =</span> <span class="st">&quot;table&quot;</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; Distribution: weibull </span></span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; KS Test results:</span></span>
@@ -454,18 +446,11 @@ via bootstrap methods, nonetheless if the argument
 <code>boot=FALSE</code> is used, the computation of the p-value is done
 using the theoretical approximation. Let us see an example:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">KScens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;lognormal&quot;</span>, <span class="at">boot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; Distribution: lognormal </span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; Null hypothesis: the data follows a lognormal distribution </span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; KS Test results:</span></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;       A p-value </span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;   0.781   0.576 </span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; Parameter estimates (se):</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; location          scale             </span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; 1.988 (0.058)     0.883 (0.045)     </span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; AIC: 1266.899 </span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; BIC: 1274.307</span></span></code></pre></div>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;   0.781   0.576</span></span></code></pre></div>
 </div>
 <div id="cramér-von-mises-test" class="section level2">
 <h2>Cramér-von Mises test</h2>
@@ -479,33 +464,19 @@ do the conclusions: we would conclude that the data may come from a
 log-normal distribution, but not from a Weibull distribution.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">CvMcens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;lognormal&quot;</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; Distribution: lognormal </span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; Null hypothesis: the data follows a lognormal distribution </span></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; CvM Test results:</span></span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;     CvM p-value </span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;   0.054   0.450 </span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; Parameter estimates (se):</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; location          scale             </span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; 1.988 (0.058)     0.883 (0.045)     </span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; AIC: 1266.899 </span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; BIC: 1274.307</span></span></code></pre></div>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;   0.054   0.450</span></span></code></pre></div>
 <p>And for the Weibull distribution:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">CvMcens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;weibull&quot;</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; Distribution: weibull </span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; Null hypothesis: the data follows a weibull distribution </span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; CvM Test results:</span></span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt;     CvM p-value </span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt;   0.376   0.001 </span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; Parameter estimates (se):</span></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; shape             scale             </span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; 1.273 (0.067)     10.98 (0.621)     </span></span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; AIC: 1304.046 </span></span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; BIC: 1311.453</span></span></code></pre></div>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt;   0.376   0.001</span></span></code></pre></div>
 </div>
 <div id="anderson-darling" class="section level2">
 <h2>Anderson-Darling</h2>
@@ -516,11 +487,10 @@ right-censored data and the p-value obtained via bootstrap methods.</p>
 a log-normal distribution with location and scale parameters equal to
 <span class="math inline">\(\mu=2\)</span> and <span class="math inline">\(\beta=1.5\)</span>, respectively. In this case, as
 shown below, the Anderson-Darling test clearly rejects the null
-hypothesis (<span class="math inline">\(p = 0.001\)</span>). Note that
-the output now displays both the parameters of the null hypothesis and
-the estimated parameters</p>
+hypothesis. Note that the output now displays both the parameters of the
+null hypothesis and the estimated parameters</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">ADcens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;lognormal&quot;</span>, </span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">ADcens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;lognormal&quot;</span>, </span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>             <span class="at">params0 =</span> <span class="fu">list</span>(<span class="at">location =</span> <span class="dv">2</span>, <span class="at">scale =</span> <span class="fl">1.5</span>)), <span class="at">outp =</span> <span class="st">&quot;table&quot;</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; Distribution: lognormal </span></span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -563,7 +533,7 @@ via bootstrap methods.</p>
 function:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">gofcens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;lognormal&quot;</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; Distribution: lognormal </span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; Null hypothesis: the data follows a lognormal distribution </span></span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; Test statistics</span></span>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;    KS   CvM    AD </span></span>
@@ -571,18 +541,11 @@ function:</p>
 <span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; p-values</span></span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt;    KS   CvM    AD </span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; 0.115 0.450 0.520 </span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; Parameter estimates (se):</span></span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; location          scale             </span></span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; 1.988 (0.058)     0.883 (0.045)     </span></span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; AIC: 1266.899 </span></span>
-<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; BIC: 1274.307</span></span></code></pre></div>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; 0.115 0.450 0.520</span></span></code></pre></div>
 <p>Now we use the function to assess whether the Weibull distribution
 fits the data, and we print the results in the table format.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">gofcens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;weibull&quot;</span>), <span class="at">outp =</span> <span class="st">&quot;table&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">gofcens</span>(times, delta, <span class="at">distr =</span> <span class="st">&quot;weibull&quot;</span>), <span class="at">outp =</span> <span class="st">&quot;table&quot;</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; Distribution: weibull </span></span>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; Tests results:</span></span>
@@ -619,34 +582,23 @@ output, the number is reduced to <span class="math inline">\(M =
 7\)</span>.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">chisqcens</span>(times, delta, <span class="at">M =</span> <span class="dv">8</span>, <span class="at">distr =</span> <span class="st">&quot;lognormal&quot;</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Distribution: lognormal </span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Null hypothesis: the data follows a lognormal distribution </span></span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; Chi-squared Test results:</span></span>
 <span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; Statistic   p-value </span></span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt;     8.657     0.307 </span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; Parameter estimates (se):</span></span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; location          scale             </span></span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; 1.988 (0.058)     0.883 (0.045)     </span></span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; Cell numbers:</span></span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; Original    Final </span></span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt;        8        7 </span></span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; AIC: 1266.899 </span></span>
-<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; BIC: 1274.307</span></span></code></pre></div>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt;     3.123     0.154</span></span></code></pre></div>
 <p>Now we use the function for the Weibull distribution and we print it
 in the table format.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">chisqcens</span>(times, delta, <span class="at">M =</span> <span class="dv">8</span>, <span class="at">distr =</span> <span class="st">&quot;weibull&quot;</span>), <span class="at">outp =</span> <span class="st">&quot;table&quot;</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">chisqcens</span>(times, delta, <span class="at">M =</span> <span class="dv">8</span>, <span class="at">distr =</span> <span class="st">&quot;weibull&quot;</span>), <span class="at">outp =</span> <span class="st">&quot;table&quot;</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; Distribution: weibull </span></span>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt; Chi-squared Test results:</span></span>
 <span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; --------- | ---------</span></span>
 <span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; Metric    | Value    </span></span>
 <span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; --------- | ---------</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; Statistic | 24.297   </span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; p-value   | 0.021    </span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; Statistic | 8.599    </span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; p-value   | 0.002    </span></span>
 <span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; --------- | ---------</span></span>
 <span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt; Parameter estimates:</span></span>
@@ -693,7 +645,7 @@ first select a random sample of survival times of size <span class="math inline"
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>nbasamp <span class="ot">&lt;-</span> nba[<span class="fu">sample</span>(<span class="fu">nrow</span>(nba), <span class="dv">500</span>), ]</span>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">gofcens</span>(<span class="fu">Surv</span>(survtime, cens) <span class="sc">~</span> <span class="dv">1</span>, nbasamp, <span class="at">distr =</span> <span class="st">&quot;logistic&quot;</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt; Distribution: logistic </span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt; Null hypothesis: the data follows a logistic distribution </span></span>
 <span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt; Test statistics</span></span>
 <span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt;    KS   CvM    AD </span></span>
@@ -701,18 +653,11 @@ first select a random sample of survival times of size <span class="math inline"
 <span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; p-values</span></span>
 <span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co">#&gt;    KS   CvM    AD </span></span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co">#&gt; 0.017 0.123 0.056 </span></span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="co">#&gt; Parameter estimates (se):</span></span>
-<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co">#&gt; location          scale             </span></span>
-<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co">#&gt; 51.882 (1.204)     8.608 (0.579)     </span></span>
-<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="co">#&gt; AIC: 1104.212 </span></span>
-<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="co">#&gt; BIC: 1112.641</span></span></code></pre></div>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co">#&gt; 0.017 0.123 0.056</span></span></code></pre></div>
 <p>Now for the normal distribution:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">gofcens</span>(<span class="fu">Surv</span>(survtime, cens) <span class="sc">~</span> <span class="dv">1</span>, nbasamp, <span class="at">distr =</span> <span class="st">&quot;normal&quot;</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co">#&gt; Distribution: normal </span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co">#&gt; Null hypothesis: the data follows a normal distribution </span></span>
 <span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; Test statistics</span></span>
 <span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt;    KS   CvM    AD </span></span>
@@ -720,14 +665,7 @@ first select a random sample of survival times of size <span class="math inline"
 <span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; p-values</span></span>
 <span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt;    KS   CvM    AD </span></span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; 0.001 0.046 0.027 </span></span>
-<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; Parameter estimates (se):</span></span>
-<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; location          scale             </span></span>
-<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt; 51.704 (1.359)     16.187 (0.969)     </span></span>
-<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt; AIC: 1111.097 </span></span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt; BIC: 1119.526</span></span></code></pre></div>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; 0.001 0.046 0.027</span></span></code></pre></div>
 <p>The test statistics of all three tests are smaller in the case of the
 logistic distribution and the corresponding p-values are larger. Thus,
 we would select the logistic distribution over the normal

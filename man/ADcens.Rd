@@ -4,8 +4,9 @@
 \alias{ADcens.default}
 \title{Anderson-Darling test for complete and right-censored data}
 \description{
-  Function \code{ADcens} computes the Anderson-Darling test statistic and p-value for complete
-  and right-censored data against eight possible distributions using bootstrapping.
+  Function \code{ADcens} computes the Anderson-Darling test statistic and p-value for
+  right-censored data against eight possible predefined or user-specified distributions
+  using bootstrapping. This function also accounts for complete data.
 }
 \usage{
 \method{ADcens}{default}(times, cens = rep(1, length(times)),
@@ -13,7 +14,8 @@
                  "lognormal", "logistic", "loglogistic", "beta"),
        betaLimits = c(0, 1), igumb = c(10, 10), BS = 999,
        params0 = list(shape = NULL, shape2 = NULL,
-                      location = NULL, scale = NULL), tol = 1e-04, ...)
+                       location = NULL, scale = NULL, theta = NULL),
+       tol = 1e-04, start = NULL, ...)
 \method{ADcens}{formula}(formula, data, ...)
 }
 \arguments{
@@ -21,11 +23,14 @@
   \item{cens}{Status indicator (1, exact time; 0, right-censored time). If not
     provided, all times are assumed to be exact.}
   \item{distr}{A string specifying the name of the distribution to be studied.
-    The possible distributions are the exponential (\code{"exponential"}),
-    the Weibull (\code{"weibull"}), the Gumbel (\code{"gumbel"}),
-    the normal (\code{"normal"}), the lognormal (\code{"lognormal"}),
-    the logistic (\code{"logistic"}), the loglogistic (\code{"loglogistic"}),
-    and the beta (\code{"beta"}) distribution.}
+               The possible distributions are the exponential (\code{"exponential"}),
+               the Weibull (\code{"weibull"}), the Gumbel (\code{"gumbel"}),
+               the normal (\code{"normal"}), the lognormal (\code{"lognormal"}),
+               the logistic (\code{"logistic"}), the loglogistic (\code{"loglogistic"}),
+               and the beta (\code{"beta"}) distribution. In addition, if the
+               character string used is \code{"name"}, every distribution for which the
+               corresponding density (\code{dname}), distribution (\code{pname}),
+               and random generator (\code{rname}) functions are defined, can be used.}
   \item{betaLimits}{Two-components vector with the lower and upper bounds of the
     Beta distribution. This argument is only required, if the beta
     distribution is considered.}
@@ -39,7 +44,13 @@
   \item{tol}{Precision of survival times.}
   \item{formula}{A formula with a numeric vector as response (which assumes no censoring) or \code{Surv} object.}
   \item{data}{Data frame for variables in \code{formula}.}
-  \item{\dots}{Additional arguments.}
+  \item{start}{A named list giving the initial values of parameters of the named
+               distribution or a function of data computing initial values and
+               returning a named list. This argument may be omitted (default)
+               for the eight prespecified distributions. See more details in
+               \link[fitdistrplus]{mledist}.}
+  \item{\dots}{Additional arguments for the \code{boot} function of the
+    \pkg{boot} package.}
 }
 \details{
   The parameter estimation is acomplished with the \code{fitdistcens}
@@ -69,7 +80,7 @@ An object of class \code{"ADcens"} is a list containing the following components
 }
 
 \references{
-  G. Marsaglia and J. Marsaglia. \emph{Evaluating the Aderson-Darling Distrinution}. In: Journal os Statistical Software, Articles, 9 (2) (2004), 1-5.
+  G. Marsaglia and J. Marsaglia. \emph{Evaluating the Anderson-Darling Distribution}. In: Journal of Statistical Software, Articles, 9 (2) (2004), 1-5. URL: https://doi.org/10.18637/jss.v009.i02
 }
 
 \author{K. Langohr, M. Besalú, M. Francisco, A. Garcia, G. Gómez.}
@@ -82,7 +93,7 @@ An object of class \code{"ADcens"} is a list containing the following components
 
 \seealso{Function \code{ad.test} (Package \pkg{goftest}) for complete data and
   function \link{gofcens} for statistics and p-value of the Kolmogorov-Smirnov,
-  Cramér von-Mises and Anderson-Darling together for right-censored data.
+  Cramér von-Mises, and Anderson-Darling together for right-censored data.
 }
 
 \examples{
@@ -90,8 +101,8 @@ An object of class \code{"ADcens"} is a list containing the following components
 set.seed(123)
 ADcens(times = rweibull(100, 12, scale = 4), distr = "weibull",
        BS = 199)
-print(ADcens(times = rweibull(100, 12, scale = 4), distr = "exponential",
-             BS = 199), outp = "table", print.BIC = FALSE, print.infoBoot = TRUE)
+summary(ADcens(times = rweibull(100, 12, scale = 4), distr = "exponential",
+        BS = 199), outp = "table", print.BIC = FALSE, print.infoBoot = TRUE)
 
 \dontrun{
 # Censored data
